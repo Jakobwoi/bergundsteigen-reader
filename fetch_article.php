@@ -16,10 +16,11 @@ function fetchArticle($url)
     echo $article->childNodes->length;
     echo "<br><br>\n";
     foreach ($article->childNodes as $node) {
+        /** @var \Dom\Node|object{outerHTML: string} $node */ // just for intelliphense to not complain
         if ($node->nodeName == "P") {
-            echo "paragraph<br>\n";
+            echo $node->outerHTML."\n";
         } elseif ($node->nodeName == "H2") {
-            echo "heading<br>\n";
+            echo $node->outerHTML."\n";
         } elseif ($node->nodeName == "FIGURE") {
             echo "figure<br>\n";
         } elseif ($node->nodeName == "BLOCKQUOTE")
@@ -32,7 +33,6 @@ function fetchArticle($url)
                 echo "text: " . $node->textContent . "<br>\n";
             }
         } else {
-            
             echo "other: " . $node->nodeName . "<br>\n";
             echo $node->textContent . "<br>\n";
         }
