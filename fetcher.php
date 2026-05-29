@@ -83,6 +83,13 @@ function fetchArticle($url) {
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
     );
 
+    $highlightColors = array(
+        "green" => "#bbe0a766",
+        "orange" => "#fca95266",
+        "blue" => "#e2eef3",
+        "purple" => "#8677d433"
+    );
+
     $request = curl_init();
     curl_setopt($request, CURLOPT_URL, $url);
     curl_setopt($request, CURLOPT_HTTPHEADER, $headers);
@@ -123,16 +130,16 @@ function fetchArticle($url) {
 
             echo "blockquote<br>\n";
         } elseif ($node->nodeName == "DIV") {
-
-            echo "div<br>\n";
-        } elseif ($node->nodeName == "#text"){
-
-            if (trim($node->textContent) != "") {
-                echo "text: " . $node->textContent . "<br>\n";
+    
+            $nodeClasses = $node->getAttribute("class");
+            $nodeClasses = explode(" ", $nodeClasses);
+            $text = $node->getElementsByTagName("div")->item(0)->innerHTML;
+            foreach ($nodeClasses as $class) {
+                if (str_starts_with($class, "is-style-highlight-box-")) {
+                    $highlightColor = str_replace("is-style-highlight-box-", "", $class);
+                    echo "<div style=\"background-color: {$highlightColors[$highlightColor]}; padding: 10px; margin: 10px 0;\">$text</div>\n";
+                }
             }
-        } else {
-            echo "other: " . $node->nodeName . "<br>\n";
-            echo $node->textContent . "<br>\n";
         }
     }
 }
