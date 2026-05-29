@@ -1,16 +1,17 @@
 <?php
+function fetchArchive($offset = 0, $type = "", $year = "", $search = "", $order = "desc") {
 $url = "https://www.bergundsteigen.com/wp-admin/admin-ajax.php";
+
 $headers = array(
     "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
 );
 $data = array(
     "action" => "filterArchiv",
-    "offset" => "0",
-    "type" => "",
-    //"ausgabe[]" => "",
-    "year" => "",
-    "search" => "",
-    "order" => "desc"
+        "offset" => $offset,
+        "type" => $type,
+        "year" => $year,
+        "search" => $search,
+        "order" => $order
 );
 
 $request = curl_init();
@@ -19,49 +20,62 @@ curl_setopt($request, CURLOPT_POST, true);
 curl_setopt($request, CURLOPT_POSTFIELDS, http_build_query($data));
 curl_setopt($request, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
-// curl_setopt($request, CURLOPT_COOKIE, http_build_query($cookies, '', '; '));
 $result = curl_exec($request);
 curl_close($request);
+
 $json = json_decode($result);
 $htmlDom = Dom\HTMLDocument::createFromString($json->data, LIBXML_NOERROR);
-//echo $json->total;
+    $articles = array();
 
-foreach ($htmlDom->getElementsByTagName("article") as $article) {
+    foreach ($htmlDom->getElementsByTagName("article") as $articleHTML) {
+        $article = array(
+                "title" => "",
+                "link" => "",
+                "description" => "",
+                "image" => "",
+                "tags" => array(),
+                "date" => "",
+                "read_time" => "",
+                "author" => ""
+        );
     // fetch title and link of the article
-    $title = $article->getElementsByClassName("clamp clamp-2")->item(0)->getElementsByTagName("a")->item(0);
+        $title = $articleHTML->getElementsByClassName("clamp clamp-2")->item(0)->getElementsByTagName("a")->item(0);
     $link = $title->getAttribute("href");
     $titleString = $title->textContent;
-    echo "<strong>";
-    echo ($title->outerHTML);
-    echo "</strong>";
-    echo "<br>\n";
+        $article["title"] = $titleString;
+        $article["link"] = $link;
+
     // fetch description of the article
-    $description = $article->getElementsByTagName("p")->item(0)->textContent;
-    echo "<i>".$description."</i><br>\n";
+        $description = $articleHTML->getElementsByTagName("p")->item(0)->textContent;
+        $article["description"] = $description;
+
     // fetch image of the article
-    $img = $article->getElementsByTagName("img")->item(0);
+        $img = $articleHTML->getElementsByTagName("img")->item(0);
     $largestSrc = getLargestSrcsetFromImgElement($img);
-    echo "<img style='max-width: 25%; height: auto;' src='".$largestSrc."' alt='Image'>";
-    echo "<br>\n";
+        $article["image"] = $largestSrc;
+
     // fetch tags of the article
-    foreach ($article->getElementsByClassName("cat") as $cat) {
-        echo ($cat->getElementsByTagName("span")->item(0)->textContent);
-        echo ", ";
+        foreach ($articleHTML->getElementsByClassName("cat") as $cat) {
+            $article["tags"][] = $cat->getElementsByTagName("span")->item(0)->textContent;
     }
-    echo "<br>\n";
+
     // fetch date and read time of the article
-    $date_readtime = $article->getElementsByClassName("info list-info")->item(0)->getElementsByTagName("span")->item(0)->textContent;
+        $date_readtime = $articleHTML->getElementsByClassName("info list-info")->item(0)->getElementsByTagName("span")->item(0)->textContent;
     $date_readtime = explode("-", $date_readtime);
-    echo $date_readtime[0]."<br>\n";
+        $dateString = trim($date_readtime[0]);
+        // ToDo: parse date, which is compicated cause german
     if (isset($date_readtime[1])) {
-    echo $date_readtime[1]."<br>\n";
+            $read_time = trim(explode("min", $date_readtime[1])[0]);
+            $article["read_time"] = $read_time;
     }
+
     // fetch author of the article
-    $author = $article->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
-    echo $author;
-    echo "<br><br>\n";
+        $author = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
+        $article["author"] = $author;
+        array_push($articles, $article);
+    }
+    return $articles;
 }
-// var_dump($htmlDom->getElementsByTagName("article")->item(0)->getElementsByClassName("clamp clamp-2")->item(0)->getElementsByTagName("a")->item(0)->textContent);
 
 function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string 
 {
@@ -69,7 +83,6 @@ function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string
         return null;
     }
 
-    // Access attributes standardly via getAttribute()
     $srcset = $img->getAttribute('srcset');
     $src = $img->getAttribute('src');
 
@@ -77,7 +90,7 @@ function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string
         return $src ?: null;
     }
 
-    // Match image candidate strings
+    // search for all url-width pairs
     preg_match_all('/(?:[^\s,]+)\s*(?:\d+[w])?/', $srcset, $matches);
     
     $largestUrl = $src;
