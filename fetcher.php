@@ -62,8 +62,10 @@ function fetchArchive($offset = 0, $type = "", $year = "", $search = "", $order 
         // fetch date and read time of the article
         $date_readtime = $articleHTML->getElementsByClassName("info list-info")->item(0)->getElementsByTagName("span")->item(0)->textContent;
         $date_readtime = explode("-", $date_readtime);
+       
         $dateString = trim($date_readtime[0]);
-        // ToDo: parse date, which is compicated cause german
+        $article["date"] = parseDate($dateString);
+
         if (isset($date_readtime[1])) {
             $read_time = trim(explode("min", $date_readtime[1])[0]);
             $article["read_time"] = $read_time;
@@ -145,7 +147,7 @@ function fetchArticle($url) {
         "content" => $ArticleStr,
         "images" => $imgList
     );
-    
+
     return $parsedArticle;
 }
 
@@ -186,6 +188,31 @@ function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string {
     }
 
     return $largestUrl;
+}
+
+function parseDate($dateString) {
+    // Date Format "DD. MMM.(M) YYYY"
+    $months = array(
+        "Jan" => 1,
+        "Feb" => 2,
+        "März" => 3,
+        "Apr" => 4,
+        "Mai" => 5,
+        "Juni" => 6,
+        "Juli" => 7,
+        "Aug" => 8,
+        "Sep" => 9,
+        "Okt" => 10,
+        "Nov" => 11,
+        "Dez" => 12
+    );
+    $dateString = str_replace(".", "", $dateString);
+    $dateParts = explode(" ", $dateString);
+
+    $day = (int)$dateParts[0];
+    $month = $months[$dateParts[1]];
+    $year = (int)$dateParts[2];
+    return "$year-$month-$day";
 }
 
 fetchArticle("https://www.bergundsteigen.com/artikel/bergfuehrerserie-kameradenrettung-vorsteigersturz/");
