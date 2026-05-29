@@ -101,19 +101,18 @@ function fetchArticle($url) {
     $mainContent = $htmlDom->getElementsByClassName("content")->item(0);
     $article = $mainContent->getElementsByClassName("editor")->item(0);
     
-    echo $article->childNodes->length;
-    echo "<br><br>\n";
     $imgList = array();
     $imageid = 0;
+    $ArticleStr = "";
     foreach ($article->childNodes as $node) {
         // just for intelliphense to not complain
         /** @var \Dom\Node|object{outerHTML: string} $node */
         if ($node->nodeName == "P") {
 
-            echo $node->outerHTML."\n";
+            $ArticleStr .= $node->outerHTML."\n";
         } elseif ($node->nodeName == "H2") {
 
-            echo $node->outerHTML."\n";
+            $ArticleStr .= $node->outerHTML."\n";
         } elseif ($node->nodeName == "FIGURE") {
 
             $imgurl = getLargestSrcsetFromImgElement($node->getElementsByTagName("img")->item(0));
@@ -125,10 +124,10 @@ function fetchArticle($url) {
             );
             $imageid++;
             $imgList[] = $img;
-            echo "<figure><img id=\"image-$imageid\"><figcaption>$caption</figcaption></figure><br>\n";
+            $ArticleStr .= "<figure><img src=\"image-$imageid-src\" id=\"image-$imageid\"><figcaption>$caption</figcaption></figure><br>\n";
         } elseif ($node->nodeName == "BLOCKQUOTE") {
 
-            echo "blockquote<br>\n";
+            $ArticleStr .= "<blockquote><p>" . $node->textContent . "</p></blockquote><br>\n";
         } elseif ($node->nodeName == "DIV") {
     
             $nodeClasses = $node->getAttribute("class");
@@ -137,11 +136,17 @@ function fetchArticle($url) {
             foreach ($nodeClasses as $class) {
                 if (str_starts_with($class, "is-style-highlight-box-")) {
                     $highlightColor = str_replace("is-style-highlight-box-", "", $class);
-                    echo "<div style=\"background-color: {$highlightColors[$highlightColor]}; padding: 10px; margin: 10px 0;\">$text</div>\n";
+                    $ArticleStr .= "<div style=\"background-color: {$highlightColors[$highlightColor]}; padding: 10px; margin: 10px 0;\">$text</div>\n";
                 }
             }
         }
     }
+    $parsedArticle = array(
+        "content" => $ArticleStr,
+        "images" => $imgList
+    );
+    
+    return $parsedArticle;
 }
 
 function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string {
