@@ -96,22 +96,37 @@ function fetchArticle($url) {
     
     echo $article->childNodes->length;
     echo "<br><br>\n";
-
+    $imgList = array();
+    $imageid = 0;
     foreach ($article->childNodes as $node) {
-        /** @var \Dom\Node|object{outerHTML: string} $node */ // just for intelliphense to not complain
-
+        // just for intelliphense to not complain
+        /** @var \Dom\Node|object{outerHTML: string} $node */
         if ($node->nodeName == "P") {
+
             echo $node->outerHTML."\n";
         } elseif ($node->nodeName == "H2") {
+
             echo $node->outerHTML."\n";
         } elseif ($node->nodeName == "FIGURE") {
-            echo "figure<br>\n";
-        } elseif ($node->nodeName == "BLOCKQUOTE")
-        {
+
+            $imgurl = getLargestSrcsetFromImgElement($node->getElementsByTagName("img")->item(0));
+            $caption = $node->getElementsByTagName("figcaption")->item(0)->textContent;
+            $img = array(
+                "url" => $imgurl,
+                "caption" => $caption,
+                "id" => $imageid
+            );
+            $imageid++;
+            $imgList[] = $img;
+            echo "<figure><img id=\"image-$imageid\"><figcaption>$caption</figcaption></figure><br>\n";
+        } elseif ($node->nodeName == "BLOCKQUOTE") {
+
             echo "blockquote<br>\n";
         } elseif ($node->nodeName == "DIV") {
+
             echo "div<br>\n";
         } elseif ($node->nodeName == "#text"){
+
             if (trim($node->textContent) != "") {
                 echo "text: " . $node->textContent . "<br>\n";
             }
