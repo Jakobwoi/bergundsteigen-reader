@@ -250,6 +250,33 @@ function parseDate($dateString) {
     return "$year-$month-$day";
 }
 
+function updateDB(PDO $db) {
+    $totalLocal = $db->query("SELECT COUNT(Headline) FROM articles")->fetchColumn();
+    $totalOnline = fetchArchive()["total"];
+    $offset = $totalLocal;
+    if ($totalLocal < $totalOnline) {
+        $newestLocalArticle = $db->query("SELECT Headline FROM articles ORDER BY Date DESC LIMIT 1")->fetch();
+        $onlineArticleSet = fetchArchive($offset, $order = "asc");
+        $onlineArticle = $onlineArticleSet["articles"][0];
+        while ($onlineArticle["date"] > $newestLocalArticle["date"]) {
+            foreach ($onlineArticleSet["articles"] as $article) {
+                if ($article["date"] > $newestLocalArticle["date"]) {
+                    $onlineArticle = $article;
+                    saveArticle($db, $onlineArticle);
+                    sleep(5); // prevent DoS flagging
+                } else {
+                    continue;
+                }
+                $offset += $onlineArticleSet["count"];
+                $onlineArticleSet = fetchArchive($offset, $order = "asc");
+                sleep(5); // prevent DoS flagging
+            }
+        }
+    }
+}
+
+
+
 fetchArticle("https://www.bergundsteigen.com/artikel/bergfuehrerserie-kameradenrettung-vorsteigersturz/");
 
 ?>
