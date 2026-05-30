@@ -259,11 +259,16 @@ function updateDB(PDO $db) {
     $offset = $totalLocal;
     if ($totalLocal < $totalOnline) {
         $newestLocalArticle = $db->query("SELECT Headline FROM articles ORDER BY Date DESC LIMIT 1")->fetch();
+        if (!$newestLocalArticle) {
+            $newestLocalArticle = array(
+                "date" => "1970-01-01"
+            );
+        }
         $onlineArticleSet = fetchArchive($offset, $order = "asc");
         $onlineArticle = $onlineArticleSet["articles"][0];
-        while ($onlineArticle["date"] > $newestLocalArticle["date"]) {
+        while (strtotime($onlineArticle["date"]) > strtotime($newestLocalArticle["date"])) {
             foreach ($onlineArticleSet["articles"] as $article) {
-                if ($article["date"] > $newestLocalArticle["date"]) {
+                if (strtotime($article["date"]) > strtotime($newestLocalArticle["date"])) {
                     $onlineArticle = $article;
                     saveArticle($db, $onlineArticle);
                     sleep(5); // prevent DoS flagging
