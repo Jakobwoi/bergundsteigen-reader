@@ -1,5 +1,5 @@
 <?php
-function fetchArchive($offset = 0, $type = "", $year = "", $search = "", $order = "desc") {
+function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", $order = "desc") {
     $url = "https://www.bergundsteigen.com/wp-admin/admin-ajax.php";
 
     $headers = array(
@@ -76,7 +76,12 @@ function fetchArchive($offset = 0, $type = "", $year = "", $search = "", $order 
         $article["author"] = $author;
         array_push($articles, $article);
     }
-    return $articles;
+    $dataset = array(
+        "articles" => $articles,
+        "total" => $json->total, // number of matching articles
+        "count" => $json->count // number of returned articles should always be 6
+    );
+    return $dataset;
 }
 
 function fetchArticle($url) {
