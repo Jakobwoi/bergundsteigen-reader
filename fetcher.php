@@ -279,22 +279,25 @@ function updateDB(PDO $db) {
 }
 
 function createDB(PDO $conn) {
-    $conn->exec("CREATE DATABASE bergundsteigen");
+    $conn->exec("CREATE DATABASE IF NOT EXISTS bergundsteigen");
     $conn->exec("USE bergundsteigen");
-    $conn->exec("CREATE TABLE articles (
+    
+    $conn->exec("CREATE TABLE IF NOT EXISTS authors (
+        Name VARCHAR(255) PRIMARY KEY,
+        Bio TEXT(16384),
+        Image MEDIUMBLOB
+    )");
+
+    $conn->exec("CREATE TABLE IF NOT EXISTS articles (
         id INT AUTO_INCREMENT PRIMARY KEY ,
         Headline VARCHAR(512) NOT NULL,
         Outline TEXT(16384),
         Content MEDIUMTEXT,
-        Author VARCHAR(255) FOREIGN KEY REFERENCES authors(Name),
+        Author VARCHAR(255),
         IssueNo SMALLINT,
         Tags VARCHAR(512),
-        Date DATE
-    )");
-    $conn->exec("CREATE TABLE authors (
-        Name VARCHAR(255) PRIMARY KEY,
-        Bio TEXT(16384),
-        Image MEDIUMBLOB
+        Date DATE,
+        CONSTRAINT FOREIGN KEY (Author) REFERENCES authors(Name)
     )");
 }
 
