@@ -156,6 +156,36 @@ function fetchArticle($url) {
     return $parsedArticle;
 }
 
+function saveArticle(PDO $db, array $article) {
+    $stmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $articleContent = fetchArticle($article["url"]);
+    $titlepath = $article["date"]."_".str_replace(" ", "_", $article["title"]);
+
+    //get title image
+    $imgData = file_get_contents($article["image"]);
+    $img_type = pathinfo($article["image"], PATHINFO_EXTENSION);
+    $imgPath = "{$titlepath}/title-image.{$img_type}";
+    file_put_contents($imgPath, $imgData);
+
+    //get other images
+    foreach ($articleContent["images"] as $img) {
+        $imgData = file_get_contents($img["url"]);
+        $img_type = pathinfo($img["url"], PATHINFO_EXTENSION);
+        $imgPath = "{$titlepath}/image-{$img['id']}.{$img_type}";
+        file_put_contents($imgPath, $imgData);
+    }
+
+    $stmt->execute([
+        $article["headline"],
+        $article["outline"],
+        $articleContent["content"],
+        $article["author"],
+        $article["issue_no"],
+        $article["tags"],
+        $article["date"]
+    ]);
+}
+
 function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string {
     if (!$img) {
         return null;
