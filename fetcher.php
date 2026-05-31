@@ -181,8 +181,8 @@ function saveArticle(PDO $db, array $article) {
         $img_type = pathinfo($img["url"], PATHINFO_EXTENSION);
         $imgPath = "{$titlepath}/image-{$img['id']}.{$img_type}";
         if (!file_exists($imgPath)) {
-        file_put_contents($imgPath, $imgData);
-    }
+            file_put_contents($imgPath, $imgData);
+        }
     }
     $tags = implode(", ", $article["tags"]);
     $stmt->execute([
@@ -297,7 +297,7 @@ function updateDB(PDO $db) {
 function createDB(PDO $conn) {
     $conn->exec("CREATE DATABASE IF NOT EXISTS bergundsteigen");
     $conn->exec("USE bergundsteigen");
-    
+
     $conn->exec("CREATE TABLE IF NOT EXISTS authors (
         Name VARCHAR(255) PRIMARY KEY,
         Bio TEXT(16384),
@@ -316,8 +316,5 @@ function createDB(PDO $conn) {
         CONSTRAINT FOREIGN KEY (Author) REFERENCES authors(Name)
     )");
 }
-
-
-fetchArticle("https://www.bergundsteigen.com/artikel/bergfuehrerserie-kameradenrettung-vorsteigersturz/");
 
 ?>
