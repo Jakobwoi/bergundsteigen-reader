@@ -95,7 +95,7 @@ function fetchArticle($url) {
     $headers = array(
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
     );
-
+    // highlight colors extracted from css of bergundsteigen and converted to hex
     $highlightColors = array(
         "green" => "#bbe0a766",
         "orange" => "#fca95266",
@@ -113,7 +113,11 @@ function fetchArticle($url) {
     $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR);
     $mainContent = $htmlDom->getElementsByClassName("content")->item(0);
     $article = $mainContent->getElementsByClassName("editor")->item(0);
-    
+    $sidebar = $htmlDom->getElementsByClassName("sidebar")->item(0); // needed for Issue number
+    // get issue number
+    $issueNumberString = $sidebar->getElementsByTagName("h3")->item(0)->textContent;
+    preg_match("/Erschienen\sin\sder\sAusgabe\s#(\d+)/", $issueNumberString, $matches);
+    $issueNumber = $matches[1];
     $imgList = array();
     $imageid = 0;
     $ArticleStr = "";
@@ -121,13 +125,12 @@ function fetchArticle($url) {
         // just for intelliphense to not complain
         /** @var \Dom\Node|object{outerHTML: string} $node */
         if ($node->nodeName == "P") {
-
+            // paragraphs and subheadings left as they are
             $ArticleStr .= $node->outerHTML."\n";
         } elseif ($node->nodeName == "H2") {
-
             $ArticleStr .= $node->outerHTML."\n";
         } elseif ($node->nodeName == "FIGURE") {
-
+            // imag urls are extracted and replaced with placeholders
             $imgurl = getLargestSrcsetFromImgElement($node->getElementsByTagName("img")->item(0));
             if (!$node->getElementsByTagName("figcaption")->item(0)) {
                 $caption = "";
@@ -146,7 +149,7 @@ function fetchArticle($url) {
 
             $ArticleStr .= "<blockquote><p>" . $node->textContent . "</p></blockquote><br>\n";
         } elseif ($node->nodeName == "DIV") {
-    
+            // fetch divs mostly highlight boxes wiith a limited color set
             $nodeClasses = $node->getAttribute("class");
             $nodeClasses = explode(" ", $nodeClasses);
             foreach ($nodeClasses as $class) {
@@ -160,7 +163,8 @@ function fetchArticle($url) {
     }
     $parsedArticle = array(
         "content" => $ArticleStr,
-        "images" => $imgList
+        "images" => $imgList,
+        "issueNumber" => $issueNumber
     );
 
     return $parsedArticle;
@@ -182,7 +186,6 @@ function fetchAuthor($url) {
 
     $authorName = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("h1")->item(0)->textContent;
     $authorBio = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("p")->item(0)->textContent;
-    var_dump($authorInfo);
     if (!$authorInfo->getElementsByTagName("figure")->item(0) || !$authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0)) {
         $imageData = null;
     } else {
@@ -237,7 +240,7 @@ function saveArticle(PDO $db, array $article) {
         $article["outline"],
         $articleContent["content"],
         $authorInfo["name"], 
-        -1, // issue number parsing not implemented yet
+        $articleContent["issueNumber"],
         $tags,
         $article["date"]->format("Y-m-d")
     ]);
