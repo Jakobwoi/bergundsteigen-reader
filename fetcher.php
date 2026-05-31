@@ -236,7 +236,7 @@ function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string {
 }
 
 function parseDate($dateString) {
-    // Date Format "DD. MMM.(M) YYYY"
+    // Date format "DD. MMM.(M) YYYY" months in German
     $months = array(
         "Jan" => 1,
         "Feb" => 2,
@@ -257,7 +257,8 @@ function parseDate($dateString) {
     $day = (int)$dateParts[0];
     $month = $months[$dateParts[1]];
     $year = (int)$dateParts[2];
-    return "$year-$month-$day";
+    $parsedDate = DateTime::createFromFormat("Y-m-d", "{$year}-{$month}-{$day}");
+    return $parsedDate->format("Y-m-d");
 }
 
 function updateDB(PDO $db) {
