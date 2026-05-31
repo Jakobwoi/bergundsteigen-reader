@@ -29,9 +29,9 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
 
     foreach ($htmlDom->getElementsByTagName("article") as $articleHTML) {
         $article = array(
-                "title" => "",
+                "headline" => "",
                 "url" => "",
-                "description" => "",
+                "outline" => "",
                 "image" => "",
                 "tags" => array(),
                 "date" => "",
@@ -42,12 +42,12 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         $title = $articleHTML->getElementsByClassName("clamp clamp-2")->item(0)->getElementsByTagName("a")->item(0);
         $link = $title->getAttribute("href");
         $titleString = $title->textContent;
-        $article["title"] = $titleString;
+        $article["headline"] = $titleString;
         $article["url"] = $link;
 
-        // fetch description of the article
-        $description = $articleHTML->getElementsByTagName("p")->item(0)->textContent;
-        $article["description"] = $description;
+        // fetch outline of the article
+        $outline = $articleHTML->getElementsByTagName("p")->item(0)->textContent;
+        $article["outline"] = $outline;
 
         // fetch image of the article
         $img = $articleHTML->getElementsByTagName("img")->item(0);
