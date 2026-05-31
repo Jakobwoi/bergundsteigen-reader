@@ -1,5 +1,6 @@
 <?php
-function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", $order = "desc") {
+function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", $order = "desc")
+{
     $url = "https://www.bergundsteigen.com/wp-admin/admin-ajax.php";
 
     $headers = array(
@@ -29,14 +30,14 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
 
     foreach ($htmlDom->getElementsByTagName("article") as $articleHTML) {
         $article = array(
-                "headline" => "",
-                "url" => "",
-                "outline" => "",
-                "image" => "",
-                "tags" => array(),
-                "date" => "",
-                "read_time" => "",
-                "author" => ""
+            "headline" => "",
+            "url" => "",
+            "outline" => "",
+            "image" => "",
+            "tags" => array(),
+            "date" => "",
+            "read_time" => "",
+            "author" => ""
         );
         // fetch title and url of the article
         $title = $articleHTML->getElementsByClassName("clamp clamp-2")->item(0)->getElementsByTagName("a")->item(0);
@@ -62,7 +63,7 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         // fetch date and read time of the article
         $date_readtime = $articleHTML->getElementsByClassName("info list-info")->item(0)->getElementsByTagName("span")->item(0)->textContent;
         $date_readtime = explode("-", $date_readtime);
-       
+
         $dateString = trim($date_readtime[0]);
         $article["date"] = parseDate($dateString);
 
@@ -75,8 +76,8 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         $authorName = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
         $authorUrl = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->getAttribute("href");
         $author = array(
-                "name" => $authorName,
-                "url" => $authorUrl
+            "name" => $authorName,
+            "url" => $authorUrl
         );
         $article["author"] = $author;
 
@@ -90,8 +91,9 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
     return $dataset;
 }
 
-function fetchArticle($url) {
-    
+function fetchArticle($url)
+{
+
     $headers = array(
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
     );
@@ -126,16 +128,16 @@ function fetchArticle($url) {
         /** @var \Dom\Node|object{outerHTML: string} $node */
         if ($node->nodeName == "P") {
             // paragraphs and subheadings left as they are
-            $ArticleStr .= $node->outerHTML."\n";
+            $ArticleStr .= $node->outerHTML . "\n";
         } elseif ($node->nodeName == "H2") {
-            $ArticleStr .= $node->outerHTML."\n";
+            $ArticleStr .= $node->outerHTML . "\n";
         } elseif ($node->nodeName == "FIGURE") {
             // imag urls are extracted and replaced with placeholders
             $imgurl = getLargestSrcsetFromImgElement($node->getElementsByTagName("img")->item(0));
             if (!$node->getElementsByTagName("figcaption")->item(0)) {
                 $caption = "";
             } else {
-            $caption = $node->getElementsByTagName("figcaption")->item(0)->textContent;
+                $caption = $node->getElementsByTagName("figcaption")->item(0)->textContent;
             }
             $img = array(
                 "url" => $imgurl,
@@ -170,7 +172,8 @@ function fetchArticle($url) {
     return $parsedArticle;
 }
 
-function fetchAuthor($url) {
+function fetchAuthor($url, $name)
+{
     $headers = array(
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
     );
@@ -181,16 +184,22 @@ function fetchAuthor($url) {
     curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($request);
     curl_close($request);
-    $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR); 
+    $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR);
     $authorInfo = $htmlDom->getElementsByClassName("author-cat")->item(0);
-
+    if (!$authorInfo) { // some author pages are bugged or missing
+        return array(
+            "name" => $name,
+            "bio" => "",
+            "image" => null
+        );
+    }
     $authorName = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("h1")->item(0)->textContent;
     $authorBio = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("p")->item(0)->textContent;
     if (!$authorInfo->getElementsByTagName("figure")->item(0) || !$authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0)) {
         $imageData = null;
     } else {
-    $image = getLargestSrcsetFromImgElement($authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0));
-    $imageData = file_get_contents($image);
+        $image = getLargestSrcsetFromImgElement($authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0));
+        $imageData = file_get_contents($image);
     }
     $author = array(
         "name" => $authorName,
@@ -198,13 +207,13 @@ function fetchAuthor($url) {
         "image" => $imageData
     );
     return $author;
-
 }
-function saveArticle(PDO $db, array $article) {
+function saveArticle(PDO $db, array $article)
+{
     $articleStmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $authorStmt = $db->prepare("INSERT INTO authors (Name, Bio, Image) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE Name = Name");
     $articleContent = fetchArticle($article["url"]);
-    $titlepath = $article["date"]->format("Y-m-d")."_".str_replace(" ", "_", $article["headline"]);
+    $titlepath = $article["date"]->format("Y-m-d") . "_" . str_replace(" ", "_", $article["headline"]);
 
     //get title image
     $imgData = file_get_contents($article["image"]);
@@ -214,7 +223,7 @@ function saveArticle(PDO $db, array $article) {
         mkdir($titlepath);
     }
     if (!file_exists($imgPath)) {
-    file_put_contents($imgPath, $imgData);
+        file_put_contents($imgPath, $imgData);
     }
     //get other images
     foreach ($articleContent["images"] as $img) {
@@ -227,7 +236,7 @@ function saveArticle(PDO $db, array $article) {
     }
 
     // fetch author info and save to db
-    $authorInfo = fetchAuthor($article["author"]["url"]);
+    $authorInfo = fetchAuthor($article["author"]["url"], $article["author"]["name"]);
     $authorStmt->execute([
         $authorInfo["name"],
         $authorInfo["bio"],
@@ -239,14 +248,15 @@ function saveArticle(PDO $db, array $article) {
         $article["headline"],
         $article["outline"],
         $articleContent["content"],
-        $authorInfo["name"], 
+        $authorInfo["name"],
         $articleContent["issueNumber"],
         $tags,
         $article["date"]->format("Y-m-d")
     ]);
 }
 
-function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string {
+function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string
+{
     if (!$img) {
         return null;
     }
@@ -260,7 +270,7 @@ function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string {
 
     // search for all url-width pairs
     preg_match_all('/(?:[^\s,]+)\s*(?:\d+[w])?/', $srcset, $matches);
-    
+
     $largestUrl = $src;
     $maxWidth = 0;
 
@@ -285,7 +295,8 @@ function getLargestSrcsetFromImgElement(Dom\HTMLElement $img): ?string {
     return $largestUrl;
 }
 
-function parseDate($dateString) {
+function parseDate($dateString)
+{
     // Date format "DD. MMM.(M) YYYY" months in German
     $months = array(
         "Jan" => 1,
@@ -311,7 +322,8 @@ function parseDate($dateString) {
     return $parsedDate;
 }
 
-function updateDB(PDO $db) {
+function updateDB(PDO $db)
+{
     if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
         $db->exec("USE bergundsteigen");
     }
@@ -319,32 +331,39 @@ function updateDB(PDO $db) {
     $totalOnline = fetchArchive()["total"];
     $offset = $totalLocal;
     if ($totalLocal < $totalOnline) {
-        $newestLocalArticle = $db->query("SELECT Headline FROM articles ORDER BY Date DESC LIMIT 1")->fetch();
+        $newestLocalArticle = $db->query("SELECT Headline, Date FROM articles ORDER BY Date DESC LIMIT 1")->fetch();
         if (!$newestLocalArticle) {
             $newestLocalArticle = array(
                 "date" => DateTime::createFromFormat("Y-m-d", "1970-01-01")
             );
+        } else {
+            $newestLocalArticle["date"] = DateTime::createFromFormat("Y-m-d", $newestLocalArticle["Date"]);
         }
-        $onlineArticleSet = fetchArchive($offset,"artikel","","", "asc");
+        $onlineArticleSet = fetchArchive($offset, "artikel", "", "", "asc");
         $onlineArticle = $onlineArticleSet["articles"][0];
-        while ($onlineArticle["date"] > $newestLocalArticle["date"]) {
+        while ($onlineArticle["date"] >= $newestLocalArticle["date"]) {
             foreach ($onlineArticleSet["articles"] as $article) {
-                if ($article["date"] > $newestLocalArticle["date"]) {
+
+                if ($article["date"] >= $newestLocalArticle["date"]) {
+                    if ($article["headline"] == $newestLocalArticle["Headline"]) {
+                        continue;
+                    }
                     $onlineArticle = $article;
                     saveArticle($db, $onlineArticle);
                     sleep(5); // prevent DoS flagging
                 } else {
                     continue;
                 }
-                $offset += $onlineArticleSet["count"];
-                $onlineArticleSet = fetchArchive($offset, $order = "asc");
-                sleep(5); // prevent DoS flagging
             }
+            $offset += $onlineArticleSet["count"];
+            $onlineArticleSet = fetchArchive($offset, "artikel", "", "", "asc");
+            sleep(5); // prevent DoS flagging
         }
     }
 }
 
-function createDB(PDO $conn) {
+function createDB(PDO $conn)
+{
     $conn->exec("CREATE DATABASE IF NOT EXISTS bergundsteigen");
     $conn->exec("USE bergundsteigen");
 
@@ -366,5 +385,3 @@ function createDB(PDO $conn) {
         CONSTRAINT FOREIGN KEY (Author) REFERENCES authors(Name)
     )");
 }
-
-?>
