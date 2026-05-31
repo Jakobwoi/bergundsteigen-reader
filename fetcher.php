@@ -30,7 +30,7 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
     foreach ($htmlDom->getElementsByTagName("article") as $articleHTML) {
         $article = array(
                 "title" => "",
-                "link" => "",
+                "url" => "",
                 "description" => "",
                 "image" => "",
                 "tags" => array(),
@@ -38,12 +38,12 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
                 "read_time" => "",
                 "author" => ""
         );
-        // fetch title and link of the article
+        // fetch title and url of the article
         $title = $articleHTML->getElementsByClassName("clamp clamp-2")->item(0)->getElementsByTagName("a")->item(0);
         $link = $title->getAttribute("href");
         $titleString = $title->textContent;
         $article["title"] = $titleString;
-        $article["link"] = $link;
+        $article["url"] = $link;
 
         // fetch description of the article
         $description = $articleHTML->getElementsByTagName("p")->item(0)->textContent;
@@ -264,7 +264,7 @@ function updateDB(PDO $db) {
                 "date" => "1970-01-01"
             );
         }
-        $onlineArticleSet = fetchArchive($offset, $order = "asc");
+        $onlineArticleSet = fetchArchive($offset,"artikel","","", "asc");
         $onlineArticle = $onlineArticleSet["articles"][0];
         while (strtotime($onlineArticle["date"]) > strtotime($newestLocalArticle["date"])) {
             foreach ($onlineArticleSet["articles"] as $article) {
