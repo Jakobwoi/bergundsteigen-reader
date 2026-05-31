@@ -201,7 +201,7 @@ function saveArticle(PDO $db, array $article) {
     $articleStmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $authorStmt = $db->prepare("INSERT INTO authors (Name, Bio, Image) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE Name = Name");
     $articleContent = fetchArticle($article["url"]);
-    $titlepath = $article["date"]."_".str_replace(" ", "_", $article["headline"]);
+    $titlepath = $article["date"]->format("Y-m-d")."_".str_replace(" ", "_", $article["headline"]);
 
     //get title image
     $imgData = file_get_contents($article["image"]);
@@ -239,7 +239,7 @@ function saveArticle(PDO $db, array $article) {
         $authorInfo["name"], 
         -1, // issue number parsing not implemented yet
         $tags,
-        $article["date"]
+        $article["date"]->format("Y-m-d")
     ]);
 }
 
@@ -305,7 +305,7 @@ function parseDate($dateString) {
     $month = $months[$dateParts[1]];
     $year = (int)$dateParts[2];
     $parsedDate = DateTime::createFromFormat("Y-m-d", "{$year}-{$month}-{$day}");
-    return $parsedDate->format("Y-m-d");
+    return $parsedDate;
 }
 
 function updateDB(PDO $db) {
@@ -319,14 +319,14 @@ function updateDB(PDO $db) {
         $newestLocalArticle = $db->query("SELECT Headline FROM articles ORDER BY Date DESC LIMIT 1")->fetch();
         if (!$newestLocalArticle) {
             $newestLocalArticle = array(
-                "date" => "1970-01-01"
+                "date" => DateTime::createFromFormat("Y-m-d", "1970-01-01")
             );
         }
         $onlineArticleSet = fetchArchive($offset,"artikel","","", "asc");
         $onlineArticle = $onlineArticleSet["articles"][0];
-        while (strtotime($onlineArticle["date"]) > strtotime($newestLocalArticle["date"])) {
+        while ($onlineArticle["date"] > $newestLocalArticle["date"]) {
             foreach ($onlineArticleSet["articles"] as $article) {
-                if (strtotime($article["date"]) > strtotime($newestLocalArticle["date"])) {
+                if ($article["date"] > $newestLocalArticle["date"]) {
                     $onlineArticle = $article;
                     saveArticle($db, $onlineArticle);
                     sleep(5); // prevent DoS flagging
