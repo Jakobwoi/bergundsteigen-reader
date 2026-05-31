@@ -123,7 +123,11 @@ function fetchArticle($url) {
         } elseif ($node->nodeName == "FIGURE") {
 
             $imgurl = getLargestSrcsetFromImgElement($node->getElementsByTagName("img")->item(0));
+            if (!$node->getElementsByTagName("figcaption")->item(0)) {
+                $caption = "";
+            } else {
             $caption = $node->getElementsByTagName("figcaption")->item(0)->textContent;
+            }
             $img = array(
                 "url" => $imgurl,
                 "caption" => $caption,
@@ -139,9 +143,9 @@ function fetchArticle($url) {
     
             $nodeClasses = $node->getAttribute("class");
             $nodeClasses = explode(" ", $nodeClasses);
-            $text = $node->getElementsByTagName("div")->item(0)->innerHTML;
             foreach ($nodeClasses as $class) {
                 if (str_starts_with($class, "is-style-highlight-box-")) {
+                    $text = $node->getElementsByTagName("div")->item(0)->innerHTML;
                     $highlightColor = str_replace("is-style-highlight-box-", "", $class);
                     $ArticleStr .= "<div style=\"background-color: {$highlightColors[$highlightColor]}; padding: 10px; margin: 10px 0;\">$text</div>\n";
                 }
