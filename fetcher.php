@@ -159,7 +159,7 @@ function fetchArticle($url) {
 function saveArticle(PDO $db, array $article) {
     $stmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $articleContent = fetchArticle($article["url"]);
-    $titlepath = $article["date"]."_".str_replace(" ", "_", $article["title"]);
+    $titlepath = $article["date"]."_".str_replace(" ", "_", $article["headline"]);
 
     //get title image
     $imgData = file_get_contents($article["image"]);
