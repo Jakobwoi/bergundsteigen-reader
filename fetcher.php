@@ -160,6 +160,33 @@ function fetchArticle($url) {
     return $parsedArticle;
 }
 
+function fetchAuthor($url) {
+    $headers = array(
+        "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
+    );
+    
+    $request = curl_init();
+    curl_setopt($request, CURLOPT_URL, $url);
+    curl_setopt($request, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+    $result = curl_exec($request);
+    curl_close($request);
+    $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR);
+
+    $authorInfo = $htmlDom->getElementsByClassName("author-cat")->item(0);
+    $authorName = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("h1")->item(0)->textContent;
+    $authorBio = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("p")->item(0)->textContent;
+
+    $image = getLargestSrcsetFromImgElement($authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0));
+    $imageData = file_get_contents($image);
+    $author = array(
+        "name" => $authorName,
+        "bio" => $authorBio,
+        "image" => $imageData
+    );
+    return $author;
+
+}
 function saveArticle(PDO $db, array $article) {
     $stmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $articleContent = fetchArticle($article["url"]);
