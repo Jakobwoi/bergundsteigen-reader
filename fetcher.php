@@ -164,21 +164,25 @@ function fetchAuthor($url) {
     $headers = array(
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
     );
-    
+
     $request = curl_init();
     curl_setopt($request, CURLOPT_URL, $url);
     curl_setopt($request, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($request);
     curl_close($request);
-    $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR);
-
+    $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR); 
     $authorInfo = $htmlDom->getElementsByClassName("author-cat")->item(0);
+
     $authorName = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("h1")->item(0)->textContent;
     $authorBio = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("p")->item(0)->textContent;
-
+    var_dump($authorInfo);
+    if (!$authorInfo->getElementsByTagName("figure")->item(0) || !$authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0)) {
+        $imageData = null;
+    } else {
     $image = getLargestSrcsetFromImgElement($authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0));
     $imageData = file_get_contents($image);
+    }
     $author = array(
         "name" => $authorName,
         "bio" => $authorBio,
@@ -188,7 +192,8 @@ function fetchAuthor($url) {
 
 }
 function saveArticle(PDO $db, array $article) {
-    $stmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $articleStmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $authorStmt = $db->prepare("INSERT INTO authors (Name, Bio, Image) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE Name = Name");
     $articleContent = fetchArticle($article["url"]);
     $titlepath = $article["date"]."_".str_replace(" ", "_", $article["headline"]);
 
@@ -211,12 +216,21 @@ function saveArticle(PDO $db, array $article) {
             file_put_contents($imgPath, $imgData);
         }
     }
-    $tags = implode(", ", $article["tags"]);
-    $stmt->execute([
+
+    // fetch author info and save to db
+    $authorInfo = fetchAuthor($article["author"]["url"]);
+    $authorStmt->execute([
+        $authorInfo["name"],
+        $authorInfo["bio"],
+        $authorInfo["image"]
+    ]);
+
+    $tags = implode(", ", $article["tags"]); // convert tags for storage
+    $articleStmt->execute([
         $article["headline"],
         $article["outline"],
         $articleContent["content"],
-        NULL, // 
+        $authorInfo["name"], 
         -1, // issue number parsing not implemented yet
         $tags,
         $article["date"]
