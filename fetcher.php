@@ -165,23 +165,29 @@ function saveArticle(PDO $db, array $article) {
     $imgData = file_get_contents($article["image"]);
     $img_type = pathinfo($article["image"], PATHINFO_EXTENSION);
     $imgPath = "{$titlepath}/title-image.{$img_type}";
+    if (!file_exists($titlepath)) {
+        mkdir($titlepath);
+    }
+    if (!file_exists($imgPath)) {
     file_put_contents($imgPath, $imgData);
-
+    }
     //get other images
     foreach ($articleContent["images"] as $img) {
         $imgData = file_get_contents($img["url"]);
         $img_type = pathinfo($img["url"], PATHINFO_EXTENSION);
         $imgPath = "{$titlepath}/image-{$img['id']}.{$img_type}";
+        if (!file_exists($imgPath)) {
         file_put_contents($imgPath, $imgData);
     }
-
+    }
+    $tags = implode(", ", $article["tags"]);
     $stmt->execute([
         $article["headline"],
         $article["outline"],
         $articleContent["content"],
-        $article["author"],
-        $article["issue_no"],
-        $article["tags"],
+        NULL, // 
+        -1, // issue number parsing not implemented yet
+        $tags,
         $article["date"]
     ]);
 }
