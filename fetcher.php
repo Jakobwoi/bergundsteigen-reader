@@ -72,8 +72,14 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         }
 
         // fetch author of the article
-        $author = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
+        $authorName = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
+        $authorUrl = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->getAttribute("href");
+        $author = array(
+                "name" => $authorName,
+                "url" => $authorUrl
+        );
         $article["author"] = $author;
+
         array_push($articles, $article);
     }
     $dataset = array(
