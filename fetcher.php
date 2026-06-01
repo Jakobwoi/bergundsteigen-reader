@@ -212,7 +212,7 @@ function fetchAuthor($url, $name)
         $imageData = file_get_contents($image);
     }
     $author = array(
-        "name" => $authorName,
+        "name" => $name,
         "bio" => $authorBio,
         "image" => $imageData
     );
@@ -246,12 +246,16 @@ function saveArticle(PDO $db, array $article)
     }
 
     // fetch author info and save to db
-    $authorInfo = fetchAuthor($article["author"]["url"], $article["author"]["name"]);
-    $authorStmt->execute([
-        $authorInfo["name"],
-        $authorInfo["bio"],
-        $authorInfo["image"]
-    ]);
+    $localSearch = $db->query("SELECT Name FROM authors WHERE Name = " . $db->quote($article["author"]["name"]))->fetch(PDO::FETCH_ASSOC);
+    if (!$localSearch["Name"]){ // only fetch new authors
+        $authorInfo = fetchAuthor($article["author"]["url"], $article["author"]["name"]);
+        $authorStmt->execute([
+            $authorInfo["name"],
+            $authorInfo["bio"],
+            $authorInfo["image"]
+        ]);
+    }
+    
 
     $tags = implode(", ", $article["tags"]); // convert tags for storage
     $articleStmt->execute([
@@ -365,7 +369,8 @@ function updateDB(PDO $db)
                     continue;
                 }
             }
-            $offset += $onlineArticleSet["count"];
+            $totalLocal = $db->query("SELECT COUNT(Headline) FROM articles")->fetchColumn();
+            $offset = $totalLocal;
             $onlineArticleSet = fetchArchive($offset, "artikel", "", "", "asc");
             sleep(5); // prevent DoS flagging
         }
