@@ -116,10 +116,16 @@ function fetchArticle($url)
     $mainContent = $htmlDom->getElementsByClassName("content")->item(0);
     $article = $mainContent->getElementsByClassName("editor")->item(0);
     $sidebar = $htmlDom->getElementsByClassName("sidebar")->item(0); // needed for Issue number
-    // get issue number
-    $issueNumberString = $sidebar->getElementsByTagName("h3")->item(0)->textContent;
-    preg_match("/Erschienen\sin\sder\sAusgabe\s#(\d+)/", $issueNumberString, $matches);
-    $issueNumber = $matches[1];
+    if (!$sidebar) {
+        // some articles are exclussively online
+        error_log("Sidebar not found for article: $url");
+        $issueNumber = -1;
+    }else {
+        // get issue number
+        $issueNumberString = $sidebar->getElementsByTagName("h3")->item(0)->textContent;
+        preg_match("/Erschienen\sin\sder\sAusgabe\s#(\d+)/", $issueNumberString, $matches);
+        $issueNumber = $matches[1];
+    }
     $imgList = array();
     $imageid = 0;
     $ArticleStr = "";
