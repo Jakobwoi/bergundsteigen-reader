@@ -81,7 +81,7 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
             $authorUrl = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->getAttribute("href");
         }
         $author = array(
-            "name" => $authorName,
+            "name" => trim($authorName, " \t\n\r\0\x0B\xC2\xA0"),
             "url" => $authorUrl
         );
         $article["author"] = $author;
@@ -123,7 +123,7 @@ function fetchArticle($url)
     $sidebar = $htmlDom->getElementsByClassName("sidebar")->item(0); // needed for Issue number
     if (!$sidebar) {
         // some articles are exclussively online
-        error_log("Sidebar not found for article: $url");
+        // error_log("Sidebar not found for article: $url");
         $issueNumber = -1;
     }else {
         // get issue number
@@ -217,8 +217,8 @@ function fetchAuthor($url, $name)
         $imageData = file_get_contents($image);
     }
     $author = array(
-        "name" => $name,
-        "bio" => $authorBio,
+        "name" => trim($name, " \t\n\r\0\x0B\xC2\xA0"),
+        "bio" => trim($authorBio, " \t\n\r\0\x0B\xC2\xA0"),
         "image" => $imageData
     );
     return $author;
@@ -252,17 +252,17 @@ function saveArticle(PDO $db, array $article)
 
     // fetch author info and save to db
     $localSearch = $db->query("SELECT Name, Bio FROM authors WHERE Name = " . $db->quote($article["author"]["name"]))->fetch(PDO::FETCH_ASSOC);
-    if (!$localSearch["Name"]){ // only fetch new authors
+    if (!$localSearch){ // only fetch new authors
         $authorInfo = fetchAuthor($article["author"]["url"], $article["author"]["name"]);
         $authorStmt->execute([
-            trim($authorInfo["name"]),
-            trim($authorInfo["bio"]),
+            $authorInfo["name"],
+            $authorInfo["bio"],
             $authorInfo["image"]
         ]);
     } else {
         $authorInfo = array(
-            "name" => $localSearch["Name"],
-            "bio" => $localSearch["Bio"],
+            "name" => trim($localSearch["Name"], " \t\n\r\0\x0B\xC2\xA0"),
+            "bio" => trim($localSearch["Bio"], " \t\n\r\0\x0B\xC2\xA0"),
             "image" => null
         );
     }
@@ -359,6 +359,7 @@ function updateDB(PDO $db)
         $newestLocalArticle = $db->query("SELECT Headline, Date FROM articles ORDER BY Date DESC LIMIT 1")->fetch();
         if (!$newestLocalArticle) {
             $newestLocalArticle = array(
+                "Headline" => "",
                 "date" => DateTime::createFromFormat("Y-m-d", "1970-01-01")
             );
         } else {
