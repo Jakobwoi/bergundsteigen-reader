@@ -171,7 +171,11 @@ function fetchArticle($url)
             $nodeClasses = explode(" ", $nodeClasses);
             foreach ($nodeClasses as $class) {
                 if (str_starts_with($class, "is-style-highlight-box-")) {
-                    $text = $node->getElementsByTagName("div")->item(0)->innerHTML;
+                    if (!$node->getElementsByTagName("div")->item(0)) {
+                        $text = $node->innerHTML;
+                    } else {
+                        $text = $node->getElementsByTagName("div")->item(0)->innerHTML;
+                    }
                     $highlightColor = str_replace("is-style-highlight-box-", "", $class);
                     $ArticleStr .= "<div style=\"background-color: {$highlightColors[$highlightColor]}; padding: 10px; margin: 10px 0;\">$text</div>\n";
                 }
