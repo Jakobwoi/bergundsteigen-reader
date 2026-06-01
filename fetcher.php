@@ -73,8 +73,13 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         }
 
         // fetch author of the article
-        $authorName = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
-        $authorUrl = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->getAttribute("href");
+        if (!$articleHTML->getElementsByClassName("info-item author")->item(0) || !$articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)) {
+            $authorName = null;
+            $authorUrl = null;
+        } else {
+            $authorName = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
+            $authorUrl = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->getAttribute("href");
+        }
         $author = array(
             "name" => $authorName,
             "url" => $authorUrl
@@ -246,14 +251,20 @@ function saveArticle(PDO $db, array $article)
     }
 
     // fetch author info and save to db
-    $localSearch = $db->query("SELECT Name FROM authors WHERE Name = " . $db->quote($article["author"]["name"]))->fetch(PDO::FETCH_ASSOC);
+    $localSearch = $db->query("SELECT Name, Bio FROM authors WHERE Name = " . $db->quote($article["author"]["name"]))->fetch(PDO::FETCH_ASSOC);
     if (!$localSearch["Name"]){ // only fetch new authors
         $authorInfo = fetchAuthor($article["author"]["url"], $article["author"]["name"]);
         $authorStmt->execute([
-            $authorInfo["name"],
-            $authorInfo["bio"],
+            trim($authorInfo["name"]),
+            trim($authorInfo["bio"]),
             $authorInfo["image"]
         ]);
+    } else {
+        $authorInfo = array(
+            "name" => $localSearch["Name"],
+            "bio" => $localSearch["Bio"],
+            "image" => null
+        );
     }
     
 
