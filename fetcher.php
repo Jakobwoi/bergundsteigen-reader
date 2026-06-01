@@ -214,7 +214,13 @@ function fetchAuthor($url, $name)
         $imageData = null;
     } else {
         $image = getLargestSrcsetFromImgElement($authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0));
-        $imageData = file_get_contents($image);
+        $imgRequest = curl_init("$image");
+        curl_setopt($imgRequest, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($imgRequest, CURLOPT_HTTPHEADER, $headers);
+        $imageData = curl_exec($imgRequest);
+        if (!$imageData) {
+            $imageData = null; // skip if image could not be fetched
+        }
     }
     $author = array(
         "name" => trim($name, " \t\n\r\0\x0B\xC2\xA0"),
@@ -228,23 +234,34 @@ function saveArticle(PDO $db, array $article)
     $articleStmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $authorStmt = $db->prepare("INSERT INTO authors (Name, Bio, Image) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE Name = Name");
     $articleContent = fetchArticle($article["url"]);
-    
+
     $titlepath = $article["date"]->format("Y-m-d") . "_" . str_replace(" ", "_", $article["headline"]);
     $titlepath = preg_replace('/[\/\0]+/', '', $titlepath); // remove forbidden characters (linux only)
 
     //get title image
-    $imgData = file_get_contents($article["image"]);
-    $img_type = pathinfo($article["image"], PATHINFO_EXTENSION);
-    $imgPath = "{$titlepath}/title-image.{$img_type}";
-    if (!file_exists($titlepath)) {
-        mkdir($titlepath);
-    }
-    if (!file_exists($imgPath)) {
-        file_put_contents($imgPath, $imgData);
+    $imgRequest = curl_init($article["image"]);
+    curl_setopt($imgRequest, CURLOPT_RETURNTRANSFER, true);
+    $imgData = curl_exec($imgRequest);
+    if (!$imgData) {
+        $imgData = null; // skip if image could not be fetched
+    } else {
+        $img_type = pathinfo($article["image"], PATHINFO_EXTENSION);
+        $imgPath = "{$titlepath}/title-image.{$img_type}";
+        if (!file_exists($titlepath)) {
+            mkdir($titlepath);
+        }
+        if (!file_exists($imgPath)) {
+            file_put_contents($imgPath, $imgData);
+        }
     }
     //get other images
     foreach ($articleContent["images"] as $img) {
-        $imgData = file_get_contents($img["url"]);
+        $imgRequest = curl_init($img["url"]);
+        curl_setopt($imgRequest, CURLOPT_RETURNTRANSFER, true);
+        $imgData = curl_exec($imgRequest);
+        if (!$imgData) {
+            continue; // skip if image could not be fetched
+        }
         $img_type = pathinfo($img["url"], PATHINFO_EXTENSION);
         $imgPath = "{$titlepath}/image-{$img['id']}.{$img_type}";
         if (!file_exists($imgPath)) {
