@@ -228,7 +228,9 @@ function saveArticle(PDO $db, array $article)
     $articleStmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $authorStmt = $db->prepare("INSERT INTO authors (Name, Bio, Image) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE Name = Name");
     $articleContent = fetchArticle($article["url"]);
+    
     $titlepath = $article["date"]->format("Y-m-d") . "_" . str_replace(" ", "_", $article["headline"]);
+    $titlepath = preg_replace('/[\/\0]+/', '', $titlepath); // remove forbidden characters (linux only)
 
     //get title image
     $imgData = file_get_contents($article["image"]);
