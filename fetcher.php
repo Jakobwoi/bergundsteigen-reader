@@ -139,7 +139,11 @@ function fetchArticle($url)
             $ArticleStr .= $node->outerHTML . "\n";
         } elseif ($node->nodeName == "FIGURE") {
             // imag urls are extracted and replaced with placeholders
-            $imgurl = getLargestSrcsetFromImgElement($node->getElementsByTagName("img")->item(0));
+            $imgElement = $node->getElementsByTagName("img")->item(0);
+            if (!$imgElement) {
+                continue; // other figures(videos etc.) are skipped
+            }
+            $imgurl = getLargestSrcsetFromImgElement($imgElement);
             if (!$node->getElementsByTagName("figcaption")->item(0)) {
                 $caption = "";
             } else {
