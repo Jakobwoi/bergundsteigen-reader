@@ -9,7 +9,7 @@ function getArticleList(PDO $db) {
     }
     return $entries;
 }
-function getArticle(PDO $db, $headline) {
+function getArticle(PDO $db, $headline, $offline = false) {
     if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
         $db->exec("USE bergundsteigen");
     }
@@ -25,9 +25,15 @@ function getArticle(PDO $db, $headline) {
             if ($img == "." || $img == "..") { // unix current and parent dir
                 continue;
             }
-            $imgId = intval(str_replace("image-", "", pathinfo($img, PATHINFO_FILENAME)))+1;
+            $imgId = intval(str_replace("image-", "", pathinfo($img, PATHINFO_FILENAME)))+1;// bad code cause I wrote bad code before ;-)
             $ref = "image-".$imgId."-src";
-            $entry["Content"] = str_replace($ref, $imgUrl."/".$img, $entry["Content"]);
+            if ($offline) {
+                $image = file_get_contents($imgPath."/".$img);
+                $imgbase64 = base64_encode($image);
+                $entry["Content"] = str_replace($ref, "data:image/jpeg;base64,".$imgbase64, $entry["Content"]);
+            } else {
+                $entry["Content"] = str_replace($ref, $imgUrl."/".$img, $entry["Content"]);
+            }
         }
         return $entry;
     }
