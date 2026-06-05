@@ -9,17 +9,18 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>Artikel</title>
     <link rel='stylesheet' href='style.css'>
+    <script src='main.js'></script>
 </head>
 <body>
 <table>
     <tr>
-        <th>Bild</th>
-        <th>Headline</th>
-        <th>Outline</th>
-        <th>Author</th>
-        <th>IssueNo</th>
-        <th>Tags</th>
-        <th>Date</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 0, true)">Bild</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 1, true)">Headline</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 2, true)">Outline</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 3, true)">Author</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 4, true)">IssueNo</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 5, true)">Tags</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 6, true)">Date</th>
     </tr>
     <?php
     $articleList = getArticleList($db);
