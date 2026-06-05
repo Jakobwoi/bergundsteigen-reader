@@ -1,9 +1,16 @@
 <?php
-function getArticleList(PDO $db) {
+function getArticleList(PDO $db, $searchKey = "", $Tag = "", $author = "", $issueNo = "",$onlyHeadlines = false) {
     if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
         $db->exec("USE bergundsteigen");
     }
-    $entries = $db->query("SELECT Headline, Outline, Author, IssueNo, Tags, Date FROM articles ORDER BY Date DESC")->fetchAll(PDO::FETCH_ASSOC);
+    if ($onlyHeadlines) {
+        $query = "SELECT Headline, Outline, Author, IssueNo, Tags, Date FROM articles WHERE Headline LIKE ? AND Tags LIKE ? AND Author LIKE ? AND IssueNo LIKE ? ORDER BY Date DESC";
+    } else {
+        $query = "SELECT Headline, Outline, Author, IssueNo, Tags, Date FROM articles WHERE Content LIKE ? AND Tags LIKE ? AND Author LIKE ? AND IssueNo LIKE ? ORDER BY Date DESC";
+    }
+    $stmt = $db->prepare($query);
+    $entries = $stmt->execute(["%{$searchKey}%", "%{$Tag}%", "%{$author}%", "%{$issueNo}%"]);
+    $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
     for ($i = 0; $i < count($entries); $i++) {
         $entries[$i]["Tags"] = explode(",", $entries[$i]["Tags"]);
     }
