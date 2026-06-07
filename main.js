@@ -1,22 +1,27 @@
 function sortTable(table, column, asc) {
-    switching = true;
-    while (switching) {
-        rows = table.rows;
-        switching = false;
-        for (i = 1; i < (rows.length - 1); i++) {
-            shouldSwitch = false;
-            x = rows[i].getElementsByTagName("TD")[column];
-            y = rows[i + 1].getElementsByTagName("TD")[column];
+    rows = Array.prototype.slice.call(table.rows);
+    rows.sort((a, b) => {
+        if (a.getElementsByTagName("TD").length == 0 || b.getElementsByTagName("TD").length == 0) {
+            return 0;
+        }
+        A = a.getElementsByTagName("TD")[column].innerHTML.toLowerCase().trim();
+        B = b.getElementsByTagName("TD")[column].innerHTML.toLowerCase().trim();
+        Anum = parseInt(A);
+        Bnum = parseInt(B);
+        if (!isNaN(Anum) && !isNaN(Bnum)) {
             if (asc) {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    
-                }
-            }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
+                return Anum - Bnum;
+            } else {
+                return Bnum - Anum;
             }
         }
-    }
+        if (asc) {
+            return A.localeCompare(B);
+        } else {
+            return B.localeCompare(A);
+        }
+    })
+    fragment = document.createDocumentFragment();
+    rows.forEach(row => fragment.appendChild(row));
+    table.appendChild(fragment);
 }
