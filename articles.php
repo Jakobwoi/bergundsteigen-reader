@@ -10,16 +10,19 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     <title>Artikel</title>
     <link rel='stylesheet' href='style.css'>
     <script src='main.js'></script>
+    <script>
+        let sortDirections = [true, true, true, true, true, true, true]; // initial sort directions for each column
+    </script>
 </head>
 <body>
 <table>
     <tr>
-        <th onclick="sortTable(this.parentNode.parentNode, 0, true)">Bild</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 1, true)">Headline</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 2, true)">Outline</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 3, true)">Author</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 4, true)">IssueNo</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 5, true)">Tags</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 0, sortDirections[0])">Bild</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 1, sortDirections[1])">Headline</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 2, sortDirections[2])">Outline</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 3, sortDirections[3])">Author</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 4, sortDirections[4])">IssueNo</th>
+        <th onclick="sortTable(this.parentNode.parentNode, 5, sortDirections[5])">Tags</th>
         <th onclick="sortTable(this.parentNode.parentNode, 6, true)">Date</th>
     </tr>
     <?php
@@ -36,7 +39,7 @@ $db = new PDO("mysql:host=localhost", "root", "root");
         } else {
             echo "<tr><td>kein Bild</td>";
         }
-        echo "<td>" . $article["Headline"] . "</td>";
+        echo "<td><a href='article.php?hash=" . $article["hash"] . "'>" . $article["Headline"] . "</a></td>";
         echo "<td>" . $article["Outline"] . "</td>";
         echo "<td>" . $article["Author"] . "</td>";
         if ($article["IssueNo"] == -1) {

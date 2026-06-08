@@ -1,4 +1,5 @@
 function sortTable(table, column, asc) {
+    asc = sortDirections[column];
     rows = Array.prototype.slice.call(table.rows);
     rows.sort((a, b) => {
         if (a.getElementsByTagName("TD").length == 0 || b.getElementsByTagName("TD").length == 0) {
@@ -24,4 +25,5 @@ function sortTable(table, column, asc) {
     fragment = document.createDocumentFragment();
     rows.forEach(row => fragment.appendChild(row));
     table.appendChild(fragment);
+    sortDirections[column] = !asc; // toggle sort direction for next click
 }
