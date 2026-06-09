@@ -4,9 +4,9 @@ function getArticleList(PDO $db, $searchKey = "", $Tag = "", $author = "", $issu
         $db->exec("USE bergundsteigen");
     }
     if ($onlyHeadlines) {
-        $query = "SELECT Headline, Outline, Author, IssueNo, Tags, Date FROM articles WHERE Headline LIKE ? AND Tags LIKE ? AND Author LIKE ? AND IssueNo LIKE ? ORDER BY Date DESC";
+        $query = "SELECT id, Headline, Hash, Outline, Author, IssueNo, Tags, Date FROM articles WHERE Headline LIKE ? AND Tags LIKE ? AND Author LIKE ? AND IssueNo LIKE ? ORDER BY Date DESC";
     } else {
-        $query = "SELECT Headline, Outline, Author, IssueNo, Tags, Date FROM articles WHERE Content LIKE ? AND Tags LIKE ? AND Author LIKE ? AND IssueNo LIKE ? ORDER BY Date DESC";
+        $query = "SELECT id, Headline, Hash, Outline, Author, IssueNo, Tags, Date FROM articles WHERE Content LIKE ? AND Tags LIKE ? AND Author LIKE ? AND IssueNo LIKE ? ORDER BY Date DESC";
     }
     $stmt = $db->prepare($query);
     $entries = $stmt->execute(["%{$searchKey}%", "%{$Tag}%", "%{$author}%", "%{$issueNo}%"]);
@@ -16,12 +16,12 @@ function getArticleList(PDO $db, $searchKey = "", $Tag = "", $author = "", $issu
     }
     return $entries;
 }
-function getArticle(PDO $db, $headline, $offline = false) {
+function getArticle(PDO $db, $headline = null, $id = null, $hash = null, $offline = false) {
     if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
         $db->exec("USE bergundsteigen");
     }
-    $entry = $db->prepare("SELECT * FROM articles WHERE Headline = ?");
-    $entry->execute([$headline]);
+    $entry = $db->prepare("SELECT * FROM articles WHERE Headline = ? OR Id = ? OR Hash = ?");
+    $entry->execute([$headline, $id, $hash]);
     $entry = $entry->fetch(PDO::FETCH_ASSOC);
     if ($entry) {
         $imgPath = $entry["Date"] . "_" . str_replace(" ", "_", $entry["Headline"]);
@@ -42,6 +42,7 @@ function getArticle(PDO $db, $headline, $offline = false) {
                 $entry["Content"] = str_replace($ref, $imgUrl."/".$img, $entry["Content"]);
             }
         }
+        $entry["Content"] = "<h1>".$entry["Headline"]."</h1>".$entry["Content"];
         return $entry;
     }
 }

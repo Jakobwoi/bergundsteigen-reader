@@ -31,6 +31,7 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
     foreach ($htmlDom->getElementsByTagName("article") as $articleHTML) {
         $article = array(
             "headline" => "",
+            "hash"  => "",
             "url" => "",
             "outline" => "",
             "image" => "",
@@ -45,7 +46,7 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         $titleString = $title->textContent;
         $article["headline"] = $titleString;
         $article["url"] = $link;
-
+        $article["hash"] = hash("sha256", $titleString);
         // fetch outline of the article
         $outline = $articleHTML->getElementsByTagName("p")->item(0)->textContent;
         $article["outline"] = $outline;
@@ -235,7 +236,7 @@ function fetchAuthor($url, $name)
 }
 function saveArticle(PDO $db, array $article)
 {
-    $articleStmt = $db->prepare("INSERT INTO articles (Headline, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $articleStmt = $db->prepare("INSERT INTO articles (Headline, Hash, Outline, Content, Author, IssueNo, Tags, Date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $authorStmt = $db->prepare("INSERT INTO authors (Name, Bio, Image) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE Name = Name");
     $articleContent = fetchArticle($article["url"]);
 
@@ -294,6 +295,7 @@ function saveArticle(PDO $db, array $article)
     $tags = implode(", ", $article["tags"]); // convert tags for storage
     $articleStmt->execute([
         $article["headline"],
+        $article["hash"],
         $article["outline"],
         $articleContent["content"],
         $authorInfo["name"],
@@ -426,6 +428,7 @@ function createDB(PDO $conn)
     $conn->exec("CREATE TABLE IF NOT EXISTS articles (
         id INT AUTO_INCREMENT PRIMARY KEY ,
         Headline VARCHAR(512) NOT NULL,
+        Hash VARCHAR(32),
         Outline TEXT(16384),
         Content MEDIUMTEXT,
         Author VARCHAR(255),
