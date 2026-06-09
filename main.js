@@ -27,3 +27,18 @@ function sortTable(table, column, asc) {
     table.appendChild(fragment);
     sortDirections[column] = !asc; // toggle sort direction for next click
 }
+function getArticle(hash = null,  id = null) {
+    if (hash) {
+        content = fetch(`article.php?hash=${hash}`).then(response => response.text());
+    } else if (id) {
+        content = fetch(`article.php?id=${id}`).then(response => response.text());
+    } else {
+        return;
+    }
+    return content;
+}
+loadArticle = (hash = null, id = null) => {
+    getArticle(hash, id).then(content => {
+        document.getElementById("articleContent").innerHTML = content;
+    });
+}
