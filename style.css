@@ -65,3 +65,13 @@ blockquote p {
   margin-left: var(--sidebar-width); /* Same as the width of the sidebar */
   padding: 0px var(--main-pad-x);
 }
+.article-cell {
+  width: 20%;
+  height: 100%;
+}
+.article-content{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+}

@@ -39,7 +39,7 @@ $db = new PDO("mysql:host=localhost", "root", "root");
         } else {
             echo "<tr><td>kein Bild</td>";
         }
-        echo "<td><a href='article.php?hash=" . $article["hash"] . "'>" . $article["Headline"] . "</a></td>";
+        echo "<td><a href='reader.php?id=" . $article["id"] . "'>" . $article["Headline"] . "</a></td>";
         echo "<td>" . $article["Outline"] . "</td>";
         echo "<td>" . $article["Author"] . "</td>";
         if ($article["IssueNo"] == -1) {
@@ -53,5 +53,33 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     }
     ?>
 </table>
+<table style="display: none;">
+    <?php 
+    $articleList = getArticleList($db);
+    $i = 0;
+    echo "<tr>\n";
+    foreach ($articleList as $article) {
+        if ($i >= 5) {
+            echo "</tr>\n";
+            echo "<tr>\n";
+            $i = 0;
+        }
+        $imgPath = $article["Date"] . "_" . str_replace(" ", "_", $article["Headline"]) . "/title-image.jpg";
+        if (file_exists($imgPath)) {
+            $pathParts = explode('/', $imgPath);
+            $encodedParts = array_map('rawurlencode', $pathParts);
+            $imgUrl = implode('/', $encodedParts);
+            } else {
+            $imgUrl = "placeholder.jpg";
+        }
+        echo "<td class='article-cell'>
+        <div class='article-content'>\n
+        <div><img src='" . $imgUrl . "' alt='Artikelbild' style='width:90%; height:auto;'></div>\n
+        <div><a href='reader.php?id=" . $article["id"] . "'>\n" . $article["Headline"] . "</a></div>\n
+        </div></td>\n";
+        $i++;
+    } ?>
+</table>
+
 </body>
 </html>
