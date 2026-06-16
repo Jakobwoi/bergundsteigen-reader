@@ -15,7 +15,7 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     </script>
 </head>
 <body>
-<table>
+<table style="display: none;">
     <tr>
         <th onclick="sortTable(this.parentNode.parentNode, 0, sortDirections[0])">Bild</th>
         <th onclick="sortTable(this.parentNode.parentNode, 1, sortDirections[1])">Headline</th>
@@ -53,17 +53,11 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     }
     ?>
 </table>
-<table style="display: none;">
+<div id="article-grid">
     <?php 
     $articleList = getArticleList($db);
     $i = 0;
-    echo "<tr>\n";
     foreach ($articleList as $article) {
-        if ($i >= 5) {
-            echo "</tr>\n";
-            echo "<tr>\n";
-            $i = 0;
-        }
         $imgPath = $article["Date"] . "_" . str_replace(" ", "_", $article["Headline"]) . "/title-image.jpg";
         if (file_exists($imgPath)) {
             $pathParts = explode('/', $imgPath);
@@ -72,14 +66,13 @@ $db = new PDO("mysql:host=localhost", "root", "root");
             } else {
             $imgUrl = "placeholder.jpg";
         }
-        echo "<td class='article-cell'>
-        <div class='article-content'>\n
-        <div><img src='" . $imgUrl . "' alt='Artikelbild' style='width:90%; height:auto;'></div>\n
-        <div><a href='reader.php?id=" . $article["id"] . "'>\n" . $article["Headline"] . "</a></div>\n
-        </div></td>\n";
+        echo "<div class='article-grid-item'>\n
+        <div class='article-image-div'><img src='" . $imgUrl . "' alt='Artikelbild' style='width:90%; height:auto;'></div>\n
+        <div class='article-title'><a href='reader.php?id=" . $article["id"] . "'>\n" . $article["Headline"] . "</a></div>\n
+        </div>\n";
         $i++;
     } ?>
-</table>
+</div>
 
 </body>
 </html>
