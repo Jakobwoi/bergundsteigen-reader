@@ -28,7 +28,6 @@ require("config.php");
             echo "<p>" . $article["Content"] . "</p>";
         }  elseif (isset($_GET["id"]) and $_GET["id"] != "") {
             $article = getArticle($db, id: $_GET["id"]);
-            echo "<h1>" . $article["Headline"] . "</h1>";
             echo "<p>" . $article["Content"] . "</p>";
         } else {
             echo "<h1>BergundSteigen Reader</h1><p>Bitte wählen Sie einen Artikel aus der Liste auf der linken Seite.</p>";
