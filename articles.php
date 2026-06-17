@@ -15,7 +15,7 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     </script>
 </head>
 <body>
-<table style="display: none;">
+<table id="article-list" style="display: none;">
     <tr>
         <th onclick="sortTable(this.parentNode.parentNode, 0, sortDirections[0])">Bild</th>
         <th onclick="sortTable(this.parentNode.parentNode, 1, sortDirections[1])">Headline</th>
@@ -66,13 +66,17 @@ $db = new PDO("mysql:host=localhost", "root", "root");
             } else {
             $imgUrl = "placeholder.jpg";
         }
-        echo "<div class='article-grid-item'>\n
+        echo "<div class='article-grid-item' onclick='window.location.href=\"reader.php?id=" . $article["id"] . "\"'>\n
         <div class='article-image-div'><img src='" . $imgUrl . "' alt='Artikelbild' style='width:90%; height:auto;'></div>\n
         <div class='article-title'><a href='reader.php?id=" . $article["id"] . "'>\n" . $article["Headline"] . "</a></div>\n
         </div>\n";
         $i++;
     } ?>
 </div>
+
+<a href="#" id="floating-btn" onclick="switchLayout()">
+  &#x25A4;
+</a>
 
 </body>
 </html>

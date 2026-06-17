@@ -42,3 +42,17 @@ loadArticle = (hash = null, id = null) => {
         document.getElementById("articleContent").innerHTML = content;
     });
 }
+function switchLayout() {
+    list = document.getElementById("article-list");
+    grid = document.getElementById("article-grid");
+    btn = document.getElementById("floating-btn");
+    if (list.style.display === "none") {
+        list.style.display = "block";
+        grid.style.display = "none";
+        btn.innerHTML = "&#x25A6;";
+    } else {
+        list.style.display = "none";
+        grid.style.display = "grid";
+        btn.innerHTML = "&#x25A4;";
+    }
+}
