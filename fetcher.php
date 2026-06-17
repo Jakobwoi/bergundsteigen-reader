@@ -424,11 +424,15 @@ function createDB(PDO $conn)
         Bio TEXT(16384),
         Image MEDIUMBLOB
     )");
+    
+    $conn->exec("CREATE TABLE IF NOT EXISTS sessions (
+        sessionId VARCHAR(32) PRIMARY KEY
+    )");
 
     $conn->exec("CREATE TABLE IF NOT EXISTS articles (
         id INT AUTO_INCREMENT PRIMARY KEY ,
         Headline VARCHAR(512) NOT NULL,
-        Hash VARCHAR(32),
+        Hash VARCHAR(64),
         Outline TEXT(16384),
         Content MEDIUMTEXT,
         Author VARCHAR(255),
