@@ -414,6 +414,25 @@ function updateDB(PDO $db)
     }
 }
 
+function updateTags(PDO $db)
+{
+    if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
+        $db->exec("USE bergundsteigen");
+    }
+    $articleList = getArticleList($db);
+    $taglist = array();
+    foreach ($articleList as $article) {
+        foreach ($article["Tags"] as $tag) {
+            $taglist[] = $tag;
+        }
+    }
+    $taglist = array_unique($taglist);
+    foreach ($taglist as $tag) {
+        $tagStmt = $db->prepare("INSERT INTO tags (Tag) VALUES (?) ON DUPLICATE KEY UPDATE Tag = Tag");
+        $tagStmt->execute([$tag]);
+    }
+}
+
 function createDB(PDO $conn)
 {
     $conn->exec("CREATE DATABASE IF NOT EXISTS bergundsteigen");
@@ -427,6 +446,10 @@ function createDB(PDO $conn)
     
     $conn->exec("CREATE TABLE IF NOT EXISTS sessions (
         sessionId VARCHAR(32) PRIMARY KEY
+    )");
+
+    $conn->exec("CREATE TABLE IF NOT EXISTS tags (
+        Tag VARCHAR(255) PRIMARY KEY
     )");
 
     $conn->exec("CREATE TABLE IF NOT EXISTS articles (

@@ -38,6 +38,9 @@ if (isset($_GET['action'])) {
             $stmt = $db->prepare("DELETE FROM sessions WHERE sessionId = :sessionId");
             $stmt->execute(['sessionId' => $_COOKIE["sessionId"]]);
             setcookie("sessionId", "");
+        case 'update_tags':
+            updateTags($db);
+            break;
     }
 }
 ?>
@@ -51,8 +54,9 @@ if (isset($_GET['action'])) {
 </head>
 <body>
     <h1>Bergundsteigen Admin Panel</h1>
-    <button onclick="window.location.href='admin.php?action=create_db'">Datenbank erstellen</button>
-    <button onclick="window.location.href='admin.php?action=update_index'">Artikelindex aktualisieren</button>
-    <button onclick="window.location.href='admin.php?action=logout'">Logout</button>
+    <button class="admin-btn" onclick="window.location.href='admin.php?action=create_db'">Datenbank erstellen</button>
+    <button class="admin-btn" onclick="window.location.href='admin.php?action=update_index'">Artikelindex aktualisieren</button>
+    <button class="admin-btn" onclick="window.location.href='admin.php?action=update_tags'">Tags aktualisieren</button>
+    <button class="admin-btn" onclick="window.location.href='admin.php?action=logout'">Logout</button>
 </body>
 </html>
