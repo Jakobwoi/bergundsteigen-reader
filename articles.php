@@ -8,6 +8,10 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>Artikel</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <link rel='stylesheet' href='style.css'>
     <script src='main.js'></script>
     <script>
@@ -15,6 +19,37 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     </script>
 </head>
 <body>
+<div class="header">
+    <h1>Artikel</h1>
+    <div id="search-container">
+        <form id="search-form" method="GET" action="articles.php">
+            <input type="text" id="search-input" placeholder="Suche...">
+            <input type="checkbox" id="only-headlines" checked>
+            <label for="only-headlines">Nur Überschrift durchsuchen</label>
+            <input type="number" id="issue-number" placeholder="Heftnummer">
+            <input type="text" id="datePicker" placeholder="Datum auswählen">
+            <script>
+                flatpickr("#datePicker", {
+                    mode: "range",
+                    maxDate: "today"
+                });
+            </script>
+            <select tags="tags" id="tags-dropdown">
+                <option value="">Alle Tags</option>
+                <?php
+                $articleList = getArticleList($db);
+                $allTags = $db->query("SELECT Tag FROM tags")->fetchAll(PDO::FETCH_COLUMN);
+
+                sort($allTags);
+                foreach ($allTags as $tag) {
+                    echo "<option value='" . htmlspecialchars($tag) . "'>" . htmlspecialchars($tag) . "</option>";
+                }
+                ?>
+            </select>
+            <input type="submit" value="Suchen">
+        </form>
+    </div>
+</div>
 <table id="article-list" style="display: none;">
     <tr>
         <th onclick="sortTable(this.parentNode.parentNode, 0, sortDirections[0])">Bild</th>
