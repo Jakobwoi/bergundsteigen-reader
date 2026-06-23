@@ -1,6 +1,18 @@
 <?php
 require("viewer.php");
 $db = new PDO("mysql:host=localhost", "root", "root");
+if ($_GET['search'] ?? false) {
+    $search = $_GET['search'];
+    $onlyHeadlines = isset($_GET['only-headlines']) ?? false;
+    $issueNumber = $_GET['issue-number'] ?? "";
+    $dateRange = $_GET['date-range'] ?? "";
+    $tags = $_GET['tags'] ?? "";
+    $author = $_GET['author'] ?? "";
+
+    $articleList = getArticleList($db, $search, $tags, $author, $issueNumber, $onlyHeadlines);
+} else {
+    $articleList = getArticleList($db);
+}
 ?>
 <!DOCTYPE html>
 <html lang='de'>
@@ -23,21 +35,20 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     <h1>Artikel</h1>
     <div id="search-container">
         <form id="search-form" method="GET" action="articles.php">
-            <input type="text" id="search-input" placeholder="Suche...">
-            <input type="checkbox" id="only-headlines" checked>
+            <input type="text" id="search-input" name="search" placeholder="Suche..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+            <input type="checkbox" id="only-headlines" name="only-headlines" value="1" <?php echo isset($_GET['only-headlines']) ? 'checked' : ''; ?>>
             <label for="only-headlines">Nur Überschrift durchsuchen</label>
-            <input type="number" id="issue-number" placeholder="Heftnummer">
-            <input type="text" id="datePicker" placeholder="Datum auswählen">
+            <input type="number" id="issue-number" name="issue-number" placeholder="Heftnummer" value="<?php echo htmlspecialchars($_GET['issue-number'] ?? ''); ?>">
+            <input type="text" id="datePicker" name="date-range" placeholder="Datum auswählen" value="<?php echo htmlspecialchars($_GET['date-range'] ?? ''); ?>">
             <script>
                 flatpickr("#datePicker", {
                     mode: "range",
                     maxDate: "today"
                 });
             </script>
-            <select tags="tags" id="tags-dropdown">
+            <select name="tags" id="tags-dropdown">
                 <option value="">Alle Tags</option>
                 <?php
-                $articleList = getArticleList($db);
                 $allTags = $db->query("SELECT Tag FROM tags")->fetchAll(PDO::FETCH_COLUMN);
 
                 sort($allTags);
@@ -61,7 +72,6 @@ $db = new PDO("mysql:host=localhost", "root", "root");
         <th onclick="sortTable(this.parentNode.parentNode, 6, true)">Date</th>
     </tr>
     <?php
-    $articleList = getArticleList($db);
     foreach ($articleList as $article) {
         $imgPath = $article["Date"] . "_" . str_replace(" ", "_", $article["Headline"]) . "/title-image.jpg";
         if (file_exists($imgPath)) {
@@ -89,8 +99,7 @@ $db = new PDO("mysql:host=localhost", "root", "root");
     ?>
 </table>
 <div id="article-grid">
-    <?php 
-    $articleList = getArticleList($db);
+    <?php
     $i = 0;
     foreach ($articleList as $article) {
         $imgPath = $article["Date"] . "_" . str_replace(" ", "_", $article["Headline"]) . "/title-image.jpg";
