@@ -1,5 +1,5 @@
 <?php
-function getArticleList(PDO $db, $searchKey = "", $Tag = "", $author = "", $issueNo = "",$onlyHeadlines = false) {
+function getArticleList(PDO $db, $searchKey = "", $tag = "", $author = "", $issueNo = "",$onlyHeadlines = false) {
     if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
         $db->exec("USE bergundsteigen");
     }
@@ -8,8 +8,22 @@ function getArticleList(PDO $db, $searchKey = "", $Tag = "", $author = "", $issu
     } else {
         $query = "SELECT id, Headline, Hash, Outline, Author, IssueNo, Tags, Date FROM articles WHERE Content LIKE ? AND Tags LIKE ? AND Author LIKE ? AND IssueNo LIKE ? ORDER BY Date DESC";
     }
+    if ($author === "all") {
+        $author = "%";
+    } elseif ($author === "") {
+        $query = str_replace("AND Author LIKE ?", "AND Author = ?", $query);
+    } else {
+        $author = "%{$author}%";
+    }
+    if ($tag === "all") {
+        $tag = "%";
+    } elseif ($tag === "") {
+        $query = str_replace("AND Tags LIKE ?", "AND Tags = ?", $query);
+    } else {
+        $tag = "%{$tag}%";
+    }
     $stmt = $db->prepare($query);
-    $entries = $stmt->execute(["%{$searchKey}%", "%{$Tag}%", "%{$author}%", "%{$issueNo}%"]);
+    $entries = $stmt->execute(["%{$searchKey}%", $tag, $author, "%{$issueNo}%"]);
     $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
     for ($i = 0; $i < count($entries); $i++) {
         $entries[$i]["Tags"] = explode(",", $entries[$i]["Tags"]);

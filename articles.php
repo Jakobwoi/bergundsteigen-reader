@@ -47,10 +47,10 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             <select input="text" name="author" id="author-dropdown">
                 <?php
                 $allAuthors = $db->query("SELECT Name, ArticleCount FROM authors ORDER BY ArticleCount DESC")->fetchAll(PDO::FETCH_ASSOC);
-                if (!$_GET['author'] || ($_GET['author'] ?? false) === '') {
-                    echo "<option value='' selected>Alle Autoren</option>";
+                if (!$_GET['author'] || ($_GET['author'] ?? false) === 'all') {
+                    echo "<option value='all' selected>Alle Autoren</option>";
                 } else {
-                    echo "<option value=''>Alle Autoren</option>";
+                    echo "<option value='all'>Alle Autoren</option>";
                 }
                 foreach ($allAuthors as $author) {
                     if ($author['Name'] === $_GET['author'] ?? false) {
@@ -70,6 +70,8 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
                 foreach ($allIssues as $issue) {
                     if ($issue === $_GET['issue-number'] ?? '') {
                         echo "<option value='" . htmlspecialchars($issue) . "' selected>" . htmlspecialchars($issue) . "</option>";
+                    } elseif ($issue === -1){
+                        echo "<option value='" . htmlspecialchars($issue) . "'>nur Online</option>";
                     } else {
                         echo "<option value='" . htmlspecialchars($issue) . "'>" . htmlspecialchars($issue) . "</option>";
                     }
@@ -77,11 +79,15 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
                 ?>
             </select>
             <select name="tags" id="tags-dropdown">
-                <option value="">Alle Tags</option>
                 <?php
                 $allTags = $db->query("SELECT Tag FROM tags")->fetchAll(PDO::FETCH_COLUMN);
 
                 sort($allTags);
+                if (!$_GET['tags'] || ($_GET['tags'] ?? false) === 'all') {
+                    echo "<option value='all' selected>Alle Tags</option>";
+                } else {
+                    echo "<option value='all'>Alle Tags</option>";
+                }
                 foreach ($allTags as $tag) {
                     if ($tag === $_GET['tags'] ?? '') {
                         echo "<option value='" . htmlspecialchars($tag) . "' selected>" . htmlspecialchars($tag) . "</option>";
