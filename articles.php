@@ -46,19 +46,17 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             </script>
             <select input="text" name="author" id="author-dropdown">
                 <?php
-                $allAuthors = $db->query("SELECT Name FROM authors")->fetchAll(PDO::FETCH_COLUMN);
-
-                sort($allAuthors);
+                $allAuthors = $db->query("SELECT Name, ArticleCount FROM authors ORDER BY ArticleCount DESC")->fetchAll(PDO::FETCH_ASSOC);
                 if (!$_GET['author'] || ($_GET['author'] ?? false) === '') {
                     echo "<option value='' selected>Alle Autoren</option>";
                 } else {
                     echo "<option value=''>Alle Autoren</option>";
                 }
                 foreach ($allAuthors as $author) {
-                    if ($author === $_GET['author'] ?? false) {
-                        echo "<option value='" . htmlspecialchars($author) . "' selected>" . htmlspecialchars($author) . "</option>";
+                    if ($author['Name'] === $_GET['author'] ?? false) {
+                        echo "<option value='" . htmlspecialchars($author['Name']) . "' selected>" . htmlspecialchars($author['Name']) . " (" . $author['ArticleCount'] . ")</option>";
                     } else {
-                        echo "<option value='" . htmlspecialchars($author) . "'>" . htmlspecialchars($author) . "</option>";
+                        echo "<option value='" . htmlspecialchars($author['Name']) . "'>" . htmlspecialchars($author['Name']) ." (" . $author['ArticleCount'] . ")</option>";
                     }
                 }
                 ?>
