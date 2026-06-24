@@ -37,7 +37,6 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
         <form id="search-form" method="GET" action="articles.php">
             <div>
             <input type="text" id="search-input" name="search" placeholder="Suche..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
-            <input type="number" id="issue-number" name="issue-number" placeholder="Heftnummer" value="<?php echo htmlspecialchars($_GET['issue-number'] ?? ''); ?>">
             <input type="text" id="datePicker" name="date-range" placeholder="Datum auswählen" value="<?php echo htmlspecialchars($_GET['date-range'] ?? ''); ?>">
             <script>
                 flatpickr("#datePicker", {
@@ -45,6 +44,40 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
                     maxDate: "today"
                 });
             </script>
+            <select input="text" name="author" id="author-dropdown">
+                <?php
+                $allAuthors = $db->query("SELECT Name FROM authors")->fetchAll(PDO::FETCH_COLUMN);
+
+                sort($allAuthors);
+                if (!$_GET['author'] || ($_GET['author'] ?? false) === '') {
+                    echo "<option value='' selected>Alle Autoren</option>";
+                } else {
+                    echo "<option value=''>Alle Autoren</option>";
+                }
+                foreach ($allAuthors as $author) {
+                    if ($author === $_GET['author'] ?? false) {
+                        echo "<option value='" . htmlspecialchars($author) . "' selected>" . htmlspecialchars($author) . "</option>";
+                    } else {
+                        echo "<option value='" . htmlspecialchars($author) . "'>" . htmlspecialchars($author) . "</option>";
+                    }
+                }
+                ?>
+            </select>
+            <select input="text" name="issue-number" id="issue-number-dropdown">
+                <option value="">Alle Hefte</option>
+                <?php
+                $allIssues = $db->query("SELECT IssueNo FROM issues")->fetchAll(PDO::FETCH_COLUMN);
+
+                sort($allIssues);
+                foreach ($allIssues as $issue) {
+                    if ($issue === $_GET['issue-number'] ?? '') {
+                        echo "<option value='" . htmlspecialchars($issue) . "' selected>" . htmlspecialchars($issue) . "</option>";
+                    } else {
+                        echo "<option value='" . htmlspecialchars($issue) . "'>" . htmlspecialchars($issue) . "</option>";
+                    }
+                }
+                ?>
+            </select>
             <select name="tags" id="tags-dropdown">
                 <option value="">Alle Tags</option>
                 <?php
