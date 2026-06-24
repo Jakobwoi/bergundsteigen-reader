@@ -1,7 +1,7 @@
 <?php
 require("viewer.php");
 $db = new PDO("mysql:host=localhost", "root", "root");
-if ($_GET['search'] ?? false) {
+if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-number'] ?? false) || ($_GET['date-range'] ?? false) || ($_GET['tags'] ?? false)) {
     $search = $_GET['search'];
     $onlyHeadlines = isset($_GET['only-headlines']) ?? false;
     $issueNumber = $_GET['issue-number'] ?? "";
@@ -35,9 +35,8 @@ if ($_GET['search'] ?? false) {
     <h1>Artikel</h1>
     <div id="search-container">
         <form id="search-form" method="GET" action="articles.php">
+            <div>
             <input type="text" id="search-input" name="search" placeholder="Suche..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
-            <input type="checkbox" id="only-headlines" name="only-headlines" value="1" <?php echo isset($_GET['only-headlines']) ? 'checked' : ''; ?>>
-            <label for="only-headlines">Nur Überschrift durchsuchen</label>
             <input type="number" id="issue-number" name="issue-number" placeholder="Heftnummer" value="<?php echo htmlspecialchars($_GET['issue-number'] ?? ''); ?>">
             <input type="text" id="datePicker" name="date-range" placeholder="Datum auswählen" value="<?php echo htmlspecialchars($_GET['date-range'] ?? ''); ?>">
             <script>
@@ -53,11 +52,19 @@ if ($_GET['search'] ?? false) {
 
                 sort($allTags);
                 foreach ($allTags as $tag) {
-                    echo "<option value='" . htmlspecialchars($tag) . "'>" . htmlspecialchars($tag) . "</option>";
+                    if ($tag === $_GET['tags'] ?? '') {
+                        echo "<option value='" . htmlspecialchars($tag) . "' selected>" . htmlspecialchars($tag) . "</option>";
+                    } else {
+                        echo "<option value='" . htmlspecialchars($tag) . "'>" . htmlspecialchars($tag) . "</option>";
+                    }
                 }
                 ?>
             </select>
-            <input type="submit" value="Suchen">
+            <input type="submit" value="Suchen"> </div> <br>
+            <div>
+            <input type="checkbox" id="only-headlines" name="only-headlines" value="1" <?php echo isset($_GET['only-headlines']) ? 'checked' : ''; ?>>
+            <label for="only-headlines">Nur Überschrift durchsuchen</label>
+            </div>
         </form>
     </div>
 </div>
