@@ -6,10 +6,18 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
     $onlyHeadlines = isset($_GET['only-headlines']) ?? false;
     $issueNumber = $_GET['issue-number'] ?? "";
     $dateRange = $_GET['date-range'] ?? "";
+    $dateRange = explode(" to ", $dateRange);
+    if (count($dateRange) == 2) {
+        $startDate = $dateRange[0];
+        $endDate = $dateRange[1];
+    } else {
+        $startDate = $dateRange[0];
+        $endDate = $dateRange[0];
+    }
     $tags = $_GET['tags'] ?? "";
     $author = $_GET['author'] ?? "";
 
-    $articleList = getArticleList($db, $search, $tags, $author, $issueNumber, $onlyHeadlines);
+    $articleList = getArticleList($db, $search, $tags, $author, $issueNumber, $onlyHeadlines, $startDate, $endDate);
 } else {
     $articleList = getArticleList($db);
 }
@@ -42,7 +50,14 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
         <form id="search-form" method="GET" action="articles.php">
             <div>
             <input type="text" id="search-input" name="search" placeholder="Suche..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
-            <input type="text" id="datePicker" name="date-range" placeholder="Datum auswählen" value="<?php echo htmlspecialchars($_GET['date-range'] ?? ''); ?>">
+            <input type="text" id="datePicker" name="date-range" placeholder="Datum auswählen" value="<?php
+            if (isset($_GET['date-range'])) {
+                echo htmlspecialchars($_GET['date-range']);
+            } else {
+                $oldestArticleDate = $db->query("SELECT MIN(Date) FROM articles")->fetchColumn();
+                $latestArticleDate = $db->query("SELECT MAX(Date) FROM articles")->fetchColumn();
+                echo htmlspecialchars($oldestArticleDate . " to " . $latestArticleDate);
+            }?>">
             <script>
                 flatpickr("#datePicker", {
                     mode: "range",
