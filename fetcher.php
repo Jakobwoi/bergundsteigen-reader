@@ -433,6 +433,25 @@ function updateTags(PDO $db)
     }
 }
 
+function updateIssues(PDO $db)
+{
+    if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
+        $db->exec("USE bergundsteigen");
+    }
+    $articleList = getArticleList($db);
+    $issuelist = array();
+    foreach ($articleList as $article) {
+        if ($article["IssueNo"] != -1) {
+            $issuelist[] = $article["IssueNo"];
+        }
+    }
+    $issuelist = array_unique($issuelist);
+    foreach ($issuelist as $issue) {
+        $issueStmt = $db->prepare("INSERT INTO issues (IssueNo) VALUES (?) ON DUPLICATE KEY UPDATE IssueNo = IssueNo");
+        $issueStmt->execute([$issue]);
+    }
+}
+
 function createDB(PDO $conn)
 {
     $conn->exec("CREATE DATABASE IF NOT EXISTS bergundsteigen");
@@ -450,6 +469,10 @@ function createDB(PDO $conn)
 
     $conn->exec("CREATE TABLE IF NOT EXISTS tags (
         Tag VARCHAR(255) PRIMARY KEY
+    )");
+
+    $conn->exec("CREATE TABLE IF NOT EXISTS issues (
+        IssueNo SMALLINT PRIMARY KEY
     )");
 
     $conn->exec("CREATE TABLE IF NOT EXISTS articles (

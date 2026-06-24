@@ -41,6 +41,9 @@ if (isset($_GET['action'])) {
         case 'update_tags':
             updateTags($db);
             break;
+        case 'update_issues':
+            updateIssues($db);
+            break;
     }
 }
 ?>
@@ -57,6 +60,7 @@ if (isset($_GET['action'])) {
     <button class="admin-btn" onclick="window.location.href='admin.php?action=create_db'">Datenbank erstellen</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_index'">Artikelindex aktualisieren</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_tags'">Tags aktualisieren</button>
+    <button class="admin-btn" onclick="window.location.href='admin.php?action=update_issues'">Hefte aktualisieren</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=logout'">Logout</button>
 </body>
 </html>
