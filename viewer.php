@@ -1,5 +1,5 @@
 <?php
-function getArticleList(PDO $db, $searchKey = "", $tag = "", $author = "", $issueNo = "",$onlyHeadlines = false, $startDate = null, $endDate = null) {
+function getArticleList(PDO $db, $searchKey = "", $tag = "all", $author = "all", $issueNo = "",$onlyHeadlines = false, $startDate = null, $endDate = null) {
     if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
         $db->exec("USE bergundsteigen");
     }
