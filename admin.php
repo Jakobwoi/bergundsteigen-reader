@@ -44,6 +44,15 @@ if (isset($_GET['action'])) {
         case 'update_issues':
             updateIssues($db);
             break;
+        case 'update_author_articles':
+            updateAuthorArticles($db);
+            break;
+        case 'update_all':
+            updateDB($db);
+            updateTags($db);
+            updateIssues($db);
+            updateAuthorArticles($db);
+            break;
     }
 }
 ?>
@@ -61,6 +70,8 @@ if (isset($_GET['action'])) {
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_index'">Artikelindex aktualisieren</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_tags'">Tags aktualisieren</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_issues'">Hefte aktualisieren</button>
+    <button class="admin-btn" onclick="window.location.href='admin.php?action=update_author_articles'">Autoren-Artikel aktualisieren</button>
+    <button class="admin-btn" onclick="window.location.href='admin.php?action=update_all'">Alle aktualisieren</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=logout'">Logout</button>
 </body>
 </html>

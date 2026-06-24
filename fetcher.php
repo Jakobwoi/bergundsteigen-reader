@@ -452,6 +452,22 @@ function updateIssues(PDO $db)
     }
 }
 
+function updateAuthorArticles(PDO $db)
+{
+    if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
+        $db->exec("USE bergundsteigen");
+    }
+
+    $authorlist = $db->query("SELECT Name FROM authors")->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($authorlist as $authorName) {
+        $authorArticlesStmt = $db->prepare("SELECT COUNT(Headline) FROM articles WHERE Author = ?");
+        $authorArticlesStmt->execute([$authorName]);
+        $authorArticleCount = $authorArticlesStmt->fetchColumn();
+        $authorUpdateStmt = $db->prepare("UPDATE authors SET ArticleCount = ? WHERE Name = ?");
+        $authorUpdateStmt->execute([$authorArticleCount, $authorName]);
+    }
+}
+
 function createDB(PDO $conn)
 {
     $conn->exec("CREATE DATABASE IF NOT EXISTS bergundsteigen");
@@ -460,6 +476,7 @@ function createDB(PDO $conn)
     $conn->exec("CREATE TABLE IF NOT EXISTS authors (
         Name VARCHAR(255) PRIMARY KEY,
         Bio TEXT(16384),
+        ArticleCount INT DEFAULT 0,
         Image MEDIUMBLOB
     )");
     
