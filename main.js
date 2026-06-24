@@ -47,10 +47,12 @@ function switchLayout() {
     grid = document.getElementById("article-grid");
     btn = document.getElementById("floating-btn");
     if (list.style.display === "none") {
+        document.cookie = "layout=list; path=/";
         list.style.display = "block";
         grid.style.display = "none";
         btn.innerHTML = "&#x25A6;";
     } else {
+        document.cookie = "layout=grid; path=/";
         list.style.display = "none";
         grid.style.display = "grid";
         btn.innerHTML = "&#x25A4;";

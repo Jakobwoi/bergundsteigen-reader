@@ -28,6 +28,11 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
     <script src='main.js'></script>
     <script>
         let sortDirections = [true, true, true, true, true, true, true]; // initial sort directions for each column
+        if (document.cookie.split('; ').find(row => row.startsWith('layout='))?.split('=')[1] === 'list') {
+            document.addEventListener("DOMContentLoaded", function() {
+                switchLayout();
+            });
+        }
     </script>
 </head>
 <body>
