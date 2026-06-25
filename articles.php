@@ -64,7 +64,7 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
                     maxDate: "today"
                 });
             </script>
-            <select input="text" name="author" id="author-dropdown">
+            <select name="author" id="author-dropdown">
                 <?php
                 $allAuthors = $db->query("SELECT Name, ArticleCount FROM authors ORDER BY ArticleCount DESC")->fetchAll(PDO::FETCH_ASSOC);
                 if (!$_GET['author'] || ($_GET['author'] ?? false) === 'all') {
@@ -130,7 +130,8 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
     </div>
 </div>
 <table id="article-list" style="display: none;">
-    <tr>
+    <thead>
+    <tr class="table-header">
         <th onclick="sortTable(this.parentNode.parentNode, 0, sortDirections[0])">Bild</th>
         <th onclick="sortTable(this.parentNode.parentNode, 1, sortDirections[1])">Headline</th>
         <th onclick="sortTable(this.parentNode.parentNode, 2, sortDirections[2])">Outline</th>
@@ -139,6 +140,8 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
         <th onclick="sortTable(this.parentNode.parentNode, 5, sortDirections[5])">Tags</th>
         <th onclick="sortTable(this.parentNode.parentNode, 6, true)">Date</th>
     </tr>
+    </thead>
+    <tbody>
     <?php
     foreach ($articleList as $article) {
         $imgPath = $article["Date"] . "_" . str_replace(" ", "_", $article["Headline"]) . "/title-image.jpg";
@@ -147,12 +150,12 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             $encodedParts = array_map('rawurlencode', $pathParts);
             $imgUrl = implode('/', $encodedParts);
 
-            echo "<tr>";
+            echo "<tr onclick='window.location.href=\"reader.php?id=" . $article["id"] . "\"'>";
             echo "<td><img src='" . $imgUrl . "' alt='Artikelbild' style='width:100px; height:auto;'></td>";
         } else {
             echo "<tr><td>kein Bild</td>";
         }
-        echo "<td><a href='reader.php?id=" . $article["id"] . "'>" . $article["Headline"] . "</a></td>";
+        echo "<td><a style='font-weight: bold;'>" . $article["Headline"] . "</a></td>";
         echo "<td>" . $article["Outline"] . "</td>";
         echo "<td>" . $article["Author"] . "</td>";
         if ($article["IssueNo"] == -1) {
@@ -165,6 +168,7 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
         echo "</tr>";
     }
     ?>
+    </tbody>
 </table>
 <div id="article-grid">
     <?php

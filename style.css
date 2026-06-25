@@ -68,6 +68,29 @@ blockquote p {
   border: #000000 solid 1px;
 }
 
+table {
+  border-collapse: collapse;
+  width: 100%;
+  padding-left: 0.5%;
+  padding-right: 0.5%;
+}
+th, td {
+  text-align: left;
+  padding: 5px;
+}
+#article-list tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+#article-list tbody tr {
+  transition: background-color .1s, transform .1s;
+}
+#article-list tbody tr:hover {
+  background-color: #00c50a5c;
+  transform: scale(1.01);
+}
+#article-list th {
+  border-bottom: 1px solid #000;
+}
 
 #article-grid {
   display: grid;
@@ -78,10 +101,12 @@ blockquote p {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  transition: transform .2s;
+  transition: transform .2s, background-color .2s, box-shadow .2s;
 }
 .article-grid-item:hover {
   transform: scale(1.1);
+  background-color: #00c50a;
+  box-shadow: 0 0 0 2em #00c50a;
 }
 
 .article-image-div {
@@ -124,7 +149,7 @@ blockquote p {
 
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
- .header {
+.header {
   padding-top: 60px;
   padding-bottom: 60px;
   text-align: center;
@@ -154,4 +179,8 @@ blockquote p {
 }
 #search-form div {
   display: block;
+}
+#search-form input[type=checkbox] {
+  height: 20px;
+  width: 20px;
 }
