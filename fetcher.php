@@ -428,8 +428,13 @@ function updateTags(PDO $db)
     }
     $taglist = array_unique($taglist);
     foreach ($taglist as $tag) {
-        $tagStmt = $db->prepare("INSERT INTO tags (Tag) VALUES (?) ON DUPLICATE KEY UPDATE Tag = Tag");
-        $tagStmt->execute([$tag]);
+        // count articles
+        $tagArticleStmt = $db->prepare("SELECT COUNT(Headline) FROM articles WHERE Tags LIKE ?");
+        $tagArticleStmt->execute(["%$tag%"]);
+        $tagArticleCount = $tagArticleStmt->fetchColumn();
+        // insert new tag or update article count
+        $tagStmt = $db->prepare("INSERT INTO tags (Tag, ArticleCount) VALUES (?, ?) ON DUPLICATE KEY UPDATE Tag = Tag, ArticleCount = ?");
+        $tagStmt->execute([$tag, $tagArticleCount, $tagArticleCount]);
     }
 }
 
@@ -445,8 +450,13 @@ function updateIssues(PDO $db)
     }
     $issuelist = array_unique($issuelist);
     foreach ($issuelist as $issue) {
-        $issueStmt = $db->prepare("INSERT INTO issues (IssueNo) VALUES (?) ON DUPLICATE KEY UPDATE IssueNo = IssueNo");
-        $issueStmt->execute([$issue]);
+        // count articles
+        $issueArticleStmt = $db->prepare("SELECT COUNT(Headline) FROM articles WHERE IssueNo = ?");
+        $issueArticleStmt->execute([$issue]);
+        $issueArticleCount = $issueArticleStmt->fetchColumn();
+        // insert new issue or update article count
+        $issueStmt = $db->prepare("INSERT INTO issues (IssueNo, ArticleCount) VALUES (?, ?) ON DUPLICATE KEY UPDATE IssueNo = IssueNo, ArticleCount = ?");
+        $issueStmt->execute([$issue,$issueArticleCount, $issueArticleCount]);
     }
 }
 
@@ -458,6 +468,7 @@ function updateAuthorArticles(PDO $db)
 
     $authorlist = $db->query("SELECT Name FROM authors")->fetchAll(PDO::FETCH_COLUMN);
     foreach ($authorlist as $authorName) {
+        // count articles
         $authorArticlesStmt = $db->prepare("SELECT COUNT(Headline) FROM articles WHERE Author = ?");
         $authorArticlesStmt->execute([$authorName]);
         $authorArticleCount = $authorArticlesStmt->fetchColumn();
@@ -483,11 +494,13 @@ function createDB(PDO $conn)
     )");
 
     $conn->exec("CREATE TABLE IF NOT EXISTS tags (
-        Tag VARCHAR(255) PRIMARY KEY
+        Tag VARCHAR(255) PRIMARY KEY,
+        ArticleCount INT DEFAULT 0
     )");
 
     $conn->exec("CREATE TABLE IF NOT EXISTS issues (
-        IssueNo SMALLINT PRIMARY KEY
+        IssueNo SMALLINT PRIMARY KEY,
+        ArticleCount INT DEFAULT 0
     )");
 
     $conn->exec("CREATE TABLE IF NOT EXISTS articles (

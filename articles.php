@@ -84,27 +84,27 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             <select input="text" name="issue-number" id="issue-number-dropdown">
                 <option value="">Alle Hefte</option>
                 <?php
-                $allIssues = $db->query("SELECT IssueNo FROM issues")->fetchAll(PDO::FETCH_COLUMN);
+                $allIssues = $db->query("SELECT IssueNo, ArticleCount FROM issues ORDER BY IssueNo")->fetchAll(PDO::FETCH_ASSOC);
 
                 sort($allIssues);
                 foreach ($allIssues as $issue) {
-                    if ($issue === $_GET['issue-number'] ?? '' && $issue !== -1) {
-                        echo "<option value='" . htmlspecialchars($issue) . "' selected>" . htmlspecialchars($issue) . "</option>";
-                    } elseif ($issue === -1){
-                        if ($issue === $_GET['issue-number'] ?? '') {
-                            echo "<option value='" . htmlspecialchars($issue) . "' selected>nur Online</option>";
+                    if (((string)$issue['IssueNo'] === $_GET['issue-number'] ?? '') && $issue['IssueNo'] != -1) {
+                        echo "<option value='" . htmlspecialchars($issue['IssueNo']) . "' selected>" . htmlspecialchars($issue['IssueNo']) . " (" . $issue['ArticleCount'] . ")</option>";
+                    } elseif ($issue['IssueNo'] === -1){
+                        if ((string)$issue['IssueNo'] === $_GET['issue-number'] ?? '') {
+                            echo "<option value='" . htmlspecialchars($issue['IssueNo']) . "' selected>nur Online (" . $issue['ArticleCount'] . ")</option>";
                         } else {
-                            echo "<option value='" . htmlspecialchars($issue) . "'>nur Online</option>";
+                            echo "<option value='" . htmlspecialchars($issue['IssueNo']) . "'>nur Online (" . $issue['ArticleCount'] . ")</option>";
                         }
                     } else {
-                        echo "<option value='" . htmlspecialchars($issue) . "'>" . htmlspecialchars($issue) . "</option>";
+                        echo "<option value='" . htmlspecialchars($issue['IssueNo']) . "'>" . htmlspecialchars($issue['IssueNo']) . " (" . $issue['ArticleCount'] . ")</option>";
                     }
                 }
                 ?>
             </select>
             <select name="tags" id="tags-dropdown">
                 <?php
-                $allTags = $db->query("SELECT Tag FROM tags")->fetchAll(PDO::FETCH_COLUMN);
+                $allTags = $db->query("SELECT Tag, ArticleCount FROM tags ORDER BY ArticleCount DESC")->fetchAll(PDO::FETCH_ASSOC);
 
                 sort($allTags);
                 if (!$_GET['tags'] || ($_GET['tags'] ?? false) === 'all') {
@@ -113,10 +113,10 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
                     echo "<option value='all'>Alle Tags</option>";
                 }
                 foreach ($allTags as $tag) {
-                    if ($tag === $_GET['tags'] ?? '') {
-                        echo "<option value='" . htmlspecialchars($tag) . "' selected>" . htmlspecialchars($tag) . "</option>";
+                    if ($tag['Tag'] === $_GET['tags'] ?? '') {
+                        echo "<option value='" . htmlspecialchars($tag['Tag']) . "' selected>" . htmlspecialchars($tag['Tag']) . " (" . $tag['ArticleCount'] . ")</option>";
                     } else {
-                        echo "<option value='" . htmlspecialchars($tag) . "'>" . htmlspecialchars($tag) . "</option>";
+                        echo "<option value='" . htmlspecialchars($tag['Tag']) . "'>" . htmlspecialchars($tag['Tag']) . " (" . $tag['ArticleCount'] . ")</option>";
                     }
                 }
                 ?>
