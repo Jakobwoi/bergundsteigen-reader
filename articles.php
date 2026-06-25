@@ -150,7 +150,7 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             $encodedParts = array_map('rawurlencode', $pathParts);
             $imgUrl = implode('/', $encodedParts);
 
-            echo "<tr onclick='window.location.href=\"reader.php?id=" . $article["id"] . "\"'>";
+            echo "<tr onclick='window.location.href=\"reader.php?id=" . $article["id"] . "&" . http_build_query($_GET) . "\"'>";
             echo "<td><img src='" . $imgUrl . "' alt='Artikelbild' style='width:100px; height:auto;'></td>";
         } else {
             echo "<tr><td>kein Bild</td>";
@@ -182,9 +182,9 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             } else {
             $imgUrl = "placeholder.jpg";
         }
-        echo "<div class='article-grid-item' onclick='window.location.href=\"reader.php?id=" . $article["id"] . "\"'>\n
+        echo "<div class='article-grid-item' onclick='window.location.href=\"reader.php?id=" . $article["id"] . "&" . http_build_query($_GET) . "\"'>\n
         <div class='article-image-div'><img src='" . $imgUrl . "' alt='Artikelbild' style='width:90%; height:auto;'></div>\n
-        <div class='article-title'><a href='reader.php?id=" . $article["id"] . "'>\n" . $article["Headline"] . "</a></div>\n
+        <div class='article-title'><a href='reader.php?id=" . $article["id"] . "&" . http_build_query($_GET) . "'>\n" . $article["Headline"] . "</a></div>\n
         </div>\n";
         $i++;
     } ?>
