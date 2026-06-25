@@ -88,10 +88,14 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
 
                 sort($allIssues);
                 foreach ($allIssues as $issue) {
-                    if ($issue === $_GET['issue-number'] ?? '') {
+                    if ($issue === $_GET['issue-number'] ?? '' && $issue !== -1) {
                         echo "<option value='" . htmlspecialchars($issue) . "' selected>" . htmlspecialchars($issue) . "</option>";
                     } elseif ($issue === -1){
-                        echo "<option value='" . htmlspecialchars($issue) . "'>nur Online</option>";
+                        if ($issue === $_GET['issue-number'] ?? '') {
+                            echo "<option value='" . htmlspecialchars($issue) . "' selected>nur Online</option>";
+                        } else {
+                            echo "<option value='" . htmlspecialchars($issue) . "'>nur Online</option>";
+                        }
                     } else {
                         echo "<option value='" . htmlspecialchars($issue) . "'>" . htmlspecialchars($issue) . "</option>";
                     }

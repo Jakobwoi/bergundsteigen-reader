@@ -441,9 +441,7 @@ function updateIssues(PDO $db)
     $articleList = getArticleList($db);
     $issuelist = array();
     foreach ($articleList as $article) {
-        if ($article["IssueNo"] != -1) {
-            $issuelist[] = $article["IssueNo"];
-        }
+        $issuelist[] = $article["IssueNo"];
     }
     $issuelist = array_unique($issuelist);
     foreach ($issuelist as $issue) {
