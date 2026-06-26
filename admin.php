@@ -38,6 +38,7 @@ if (isset($_GET['action'])) {
             $stmt = $db->prepare("DELETE FROM sessions WHERE sessionId = :sessionId");
             $stmt->execute(['sessionId' => $_COOKIE["sessionId"]]);
             setcookie("sessionId", "");
+            break;
         case 'update_tags':
             updateTags($db);
             break;
@@ -53,7 +54,31 @@ if (isset($_GET['action'])) {
             updateIssues($db);
             updateAuthorArticles($db);
             break;
+        case 'clear_db':
+            clearDB($db);
+            break;
+        case 'clearsessions':
+            clearsessions($db);
+            break;
+        
     }
+}
+
+function clearDB(PDO $db) {
+    if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
+        $db->exec("USE bergundsteigen");
+    }
+    $db->exec("DELETE * FROM articles WHERE Headline");
+    $db->exec("DELETE * FROM tags WHERE Tag");
+    $db->exec("DELETE * FROM issues WHERE IssueNo");
+    $db->exec("DELETE * FROM authors WHERE Author");
+    $db->exec("DELETE * FROM sessions WHERE sessionId");
+}
+function clearsessions(PDO $db) {
+    if ($db->query("SELECT DATABASE()")->fetchColumn() != "bergundsteigen") {
+        $db->exec("USE bergundsteigen");
+    }
+    $db->exec("DELETE * FROM sessions WHERE sessionId");
 }
 ?>
 <!DOCTYPE html>
@@ -63,6 +88,13 @@ if (isset($_GET['action'])) {
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>Bergundsteigen Admin Panel</title>
     <link rel='stylesheet' href='main.css'>
+    <script>
+        function confirmAction(action) {
+            if (confirm("Are you sure you want to " + action + "?")) {
+                window.location.href = 'admin.php?action=' + action;
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Bergundsteigen Admin Panel</h1>
@@ -72,6 +104,8 @@ if (isset($_GET['action'])) {
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_issues'">Hefte aktualisieren</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_author_articles'">Autoren-Artikel aktualisieren</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=update_all'">Alle aktualisieren</button>
+    <button class="admin-btn" onclick="confirmAction('clear_db')">Datenbank leeren</button>
+    <button class="admin-btn" onclick="confirmAction('clearsessions')">Alle Sitzungen löschen</button>
     <button class="admin-btn" onclick="window.location.href='admin.php?action=logout'">Logout</button>
 </body>
 </html>
