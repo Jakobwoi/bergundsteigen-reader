@@ -2,12 +2,12 @@
 This tool scrapes all articles from the website of the mountaineering magazine Bergundsteigen. It also implements fast search and filters. I created this tool, because they have a very weird scrolling on their website, which becomes very odd when searching for something using the browsers search tool.
 ## Showcase
 There are two different article overview layouts, grid and list. On the top you have filtering options independent of the layout.
-## Grid
+### Grid
 ![grid layout](./showcase/grid.png)
-## List
+### List
 In the list layout you can sort after the columns by clicking on the cells in the first row.
 ![list layout](./showcase/list.png)
-## article view
+### article view
 ![article view](./showcase/article.png)
 
 
