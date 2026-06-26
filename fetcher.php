@@ -41,7 +41,7 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
             "author" => ""
         );
         // fetch title and url of the article
-        $title = $articleHTML->getElementsByClassName("clamp clamp-2")->item(0)->getElementsByTagName("a")->item(0);
+        $title = $articleHTML->querySelector(".clamp.clamp-2 a");;
         $link = $title->getAttribute("href");
         $titleString = $title->textContent;
         $article["headline"] = $titleString;
@@ -57,12 +57,12 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         $article["image"] = $largestSrc;
 
         // fetch tags of the article
-        foreach ($articleHTML->getElementsByClassName("cat") as $cat) {
+        foreach ($articleHTML->querySelectorAll(".cat") as $cat) {
             $article["tags"][] = $cat->getElementsByTagName("span")->item(0)->textContent;
         }
 
         // fetch date and read time of the article
-        $date_readtime = $articleHTML->getElementsByClassName("info list-info")->item(0)->getElementsByTagName("span")->item(0)->textContent;
+        $date_readtime = $articleHTML->querySelector(".info.list-info span")->textContent;
         $date_readtime = explode("-", $date_readtime);
 
         $dateString = trim($date_readtime[0]);
@@ -74,12 +74,12 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
         }
 
         // fetch author of the article
-        if (!$articleHTML->getElementsByClassName("info-item author")->item(0) || !$articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)) {
+        if (!$articleHTML->querySelector(".info-item.author") || !$articleHTML->querySelector(".info-item.author a")) {
             $authorName = null;
             $authorUrl = null;
         } else {
-            $authorName = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->textContent;
-            $authorUrl = $articleHTML->getElementsByClassName("info-item author")->item(0)->getElementsByTagName("a")->item(0)->getAttribute("href");
+            $authorName = $articleHTML->querySelector(".info-item.author a")->textContent;
+            $authorUrl = $articleHTML->querySelector(".info-item.author a")->getAttribute("href");
         }
         $author = array(
             "name" => trim($authorName, " \t\n\r\0\x0B\xC2\xA0"),
@@ -119,9 +119,9 @@ function fetchArticle($url)
     curl_close($request);
 
     $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR);
-    $mainContent = $htmlDom->getElementsByClassName("content")->item(0);
-    $article = $mainContent->getElementsByClassName("editor")->item(0);
-    $sidebar = $htmlDom->getElementsByClassName("sidebar")->item(0); // needed for Issue number
+    $mainContent = $htmlDom->querySelector(".content");
+    $article = $mainContent->querySelector(".editor");
+    $sidebar = $htmlDom->querySelector(".sidebar"); // needed for Issue number
     if (!$sidebar) {
         // some articles are exclussively online
         // error_log("Sidebar not found for article: $url");
@@ -205,7 +205,7 @@ function fetchAuthor($url, $name)
     $result = curl_exec($request);
     curl_close($request);
     $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR);
-    $authorInfo = $htmlDom->getElementsByClassName("author-cat")->item(0);
+    $authorInfo = $htmlDom->querySelector(".author-cat");
     if (!$authorInfo) { // some author pages are bugged or missing
         return array(
             "name" => $name,
@@ -213,8 +213,8 @@ function fetchAuthor($url, $name)
             "image" => null
         );
     }
-    $authorName = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("h1")->item(0)->textContent;
-    $authorBio = $authorInfo->getElementsByClassName("info")->item(0)->getElementsByTagName("p")->item(0)->textContent;
+    $authorName = $authorInfo->querySelector(".info h1")->textContent;
+    $authorBio = $authorInfo->querySelector(".info p")->textContent;
     if (!$authorInfo->getElementsByTagName("figure")->item(0) || !$authorInfo->getElementsByTagName("figure")->item(0)->getElementsByTagName("img")->item(0)) {
         $imageData = null;
     } else {
