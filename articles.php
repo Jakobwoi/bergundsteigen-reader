@@ -132,13 +132,13 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
 <table id="article-list" style="display: none;">
     <thead>
     <tr class="table-header">
-        <th onclick="sortTable(this.parentNode.parentNode, 0, sortDirections[0])">Bild</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 1, sortDirections[1])">Headline</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 2, sortDirections[2])">Outline</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 3, sortDirections[3])">Author</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 4, sortDirections[4])">IssueNo</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 5, sortDirections[5])">Tags</th>
-        <th onclick="sortTable(this.parentNode.parentNode, 6, true)">Date</th>
+        <th onclick="sortTable(this.parentNode.parentNode.parentNode, 0, sortDirections[0])">Bild</th>
+        <th onclick="sortTable(this.parentNode.parentNode.parentNode, 1, sortDirections[1])">Headline</th>
+        <th onclick="sortTable(this.parentNode.parentNode.parentNode, 2, sortDirections[2])">Outline</th>
+        <th onclick="sortTable(this.parentNode.parentNode.parentNode, 3, sortDirections[3])">Author</th>
+        <th onclick="sortTable(this.parentNode.parentNode.parentNode, 4, sortDirections[4])">IssueNo</th>
+        <th onclick="sortTable(this.parentNode.parentNode.parentNode, 5, sortDirections[5])">Tags</th>
+        <th onclick="sortTable(this.parentNode.parentNode.parentNode, 6, sortDirections[6])">Date</th>
     </tr>
     </thead>
     <tbody>

@@ -8,7 +8,6 @@ if (isset($_GET["offline"])) {
 } 
 if (isset($_GET["hash"])) {
     $article = getArticle($db, hash: $_GET["hash"], offline: $offline);
-    echo json_encode($article);
 } elseif (isset($_GET["id"])) {
     $article = getArticle($db, id: $_GET["id"], offline: $offline);
 } else {

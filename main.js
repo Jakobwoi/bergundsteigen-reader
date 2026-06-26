@@ -1,6 +1,6 @@
 function sortTable(table, column, asc) {
-    asc = sortDirections[column];
-    rows = Array.prototype.slice.call(table.rows);
+    tbody = table.tBodies[0];
+    rows = Array.from(tbody.rows);
     rows.sort((a, b) => {
         if (a.getElementsByTagName("TD").length == 0 || b.getElementsByTagName("TD").length == 0) {
             return 0;
@@ -22,9 +22,7 @@ function sortTable(table, column, asc) {
             return B.localeCompare(A);
         }
     })
-    fragment = document.createDocumentFragment();
-    rows.forEach(row => fragment.appendChild(row));
-    table.appendChild(fragment);
+    rows.forEach(row => tbody.appendChild(row));
     sortDirections[column] = !asc; // toggle sort direction for next click
 }
 function getArticle(hash = null,  id = null) {
