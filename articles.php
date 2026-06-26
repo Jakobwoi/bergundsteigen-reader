@@ -44,6 +44,12 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
     </script>
 </head>
 <body>
+<div id="banner">
+    <div id="banner-content">
+    Alle Inhalte dieser Seite stammen aus der Zeitschrift&nbsp; <a href="https://www.bergundsteigen.at/" target="_blank"> Berg&Steigen</a>. Wenn ihr die Zeitschrift unterstützen wollt, könnt ihr sie&nbsp; <a href="https://www.bergundsteigen.at/abo/" target="_blank"> hier abonnieren</a>.
+    </div>
+</div>
+
 <div class="header">
     <h1>Artikel</h1>
     <div id="search-container">

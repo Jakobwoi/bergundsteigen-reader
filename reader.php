@@ -30,8 +30,19 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
     <title>BergundSteigen</title>
     <script src='main.js'></script>
     <link rel='stylesheet' href='style.css'>
+    <style>
+        body {
+            top: 3em;
+            position: relative;
+        }
+    </style>
 </head>
 <body>
+    <div id="banner">
+        <div id="banner-content">
+        Alle Inhalte dieser Seite stammen aus der Zeitschrift&nbsp; <a href="https://www.bergundsteigen.at/" target="_blank"> Berg&Steigen</a>. Wenn ihr die Zeitschrift unterstützen wollt, könnt ihr sie&nbsp; <a href="https://www.bergundsteigen.at/abo/" target="_blank"> hier abonnieren</a>.
+        </div>
+    </div>
     <div class="sidenav" id="articles">
         <?php
         foreach ($articleList as $article) {
