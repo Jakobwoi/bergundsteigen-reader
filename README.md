@@ -1,5 +1,16 @@
 # Bergundsteigen Reader
 This tool scrapes all articles from the website of the mountaineering magazine Bergundsteigen. It also implements fast search and filters. I created this tool, because they have a very weird scrolling on their website, which becomes very odd when searching for something using the browsers search tool.
+## Showcase
+There are two different article overview layouts, grid and list. On the top you have filtering options independent of the layout.
+## Grid
+![grid layout](./showcase/grid.png)
+## List
+In the list layout you can sort after the columns by clicking on the cells in the first row.
+![list layout](./showcase/list.png)
+## article view
+![article view](./showcase/article.png)
+
+
 ## Setup
 Copy all files to the directory where you want the reader and change the admin and user pw as well as the DB credentials in ```config.php```. Create a daily cronjob for ```update.php```.
 ## AI Declaration
