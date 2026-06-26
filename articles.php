@@ -153,7 +153,7 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             echo "<tr onclick='window.location.href=\"reader.php?id=" . $article["id"] . "&" . http_build_query($_GET) . "\"'>";
             echo "<td><img src='" . $imgUrl . "' alt='Artikelbild' style='width:100px; height:auto;'></td>";
         } else {
-            echo "<tr><td>kein Bild</td>";
+            echo "<tr><td><img src='img-placeholder.svg' alt='Artikelbild' style='width:100px; height:auto;'></td>";
         }
         echo "<td><a style='font-weight: bold;'>" . $article["Headline"] . "</a></td>";
         echo "<td>" . $article["Outline"] . "</td>";
@@ -180,7 +180,7 @@ if (($_GET['search'] ?? false) || ($_GET['author'] ?? false) || ($_GET['issue-nu
             $encodedParts = array_map('rawurlencode', $pathParts);
             $imgUrl = implode('/', $encodedParts);
             } else {
-            $imgUrl = "placeholder.jpg";
+            $imgUrl = "img-placeholder.svg";
         }
         echo "<div class='article-grid-item' onclick='window.location.href=\"reader.php?id=" . $article["id"] . "&" . http_build_query($_GET) . "\"'>\n
         <div class='article-image-div'><img src='" . $imgUrl . "' alt='Artikelbild' style='width:90%; height:auto;'></div>\n
