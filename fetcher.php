@@ -401,6 +401,8 @@ function updateDB(PDO $db)
                     }
                     $onlineArticle = $article;
                     saveArticle($db, $onlineArticle);
+                    $newestLocalArticle = $db->query("SELECT Headline, Date FROM articles ORDER BY Date DESC LIMIT 1")->fetch();
+                    $newestLocalArticle["date"] = DateTime::createFromFormat("Y-m-d", $newestLocalArticle["Date"]);
                     sleep(5); // prevent DoS flagging
                 } else {
                     continue;
