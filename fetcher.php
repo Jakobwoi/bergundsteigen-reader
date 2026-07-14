@@ -526,6 +526,9 @@ function createDB(PDO $conn)
 
 function logDebug($message)
 {
+    if (!$DEBUG_MODE) {
+        return;
+    }
     $logFile = 'debug.log';
     $timestamp = date('Y-m-d H:i:s');
     $logMessage = "[$timestamp] $message\n";
