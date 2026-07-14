@@ -99,7 +99,7 @@ function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", 
 
 function fetchArticle($url)
 {
-
+    logDebug("Fetching article: $url");
     $headers = array(
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0",
     );
@@ -117,7 +117,7 @@ function fetchArticle($url)
     curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($request);
     curl_close($request);
-
+    logDebug("Downloaded raw article: $url");
     $htmlDom = Dom\HTMLDocument::createFromString($result, LIBXML_NOERROR);
     $mainContent = $htmlDom->querySelector(".content");
     $article = $mainContent->querySelector(".editor");
@@ -128,6 +128,7 @@ function fetchArticle($url)
         $issueNumber = -1;
     }else {
         // get issue number
+        logDebug("Sidebar found for article: $url");
         $issueNumberString = $sidebar->getElementsByTagName("h3")->item(0)->textContent;
         preg_match("/Erschienen\sin\sder\sAusgabe\s#(\d+)/", $issueNumberString, $matches);
         $issueNumber = $matches[1];
@@ -140,13 +141,16 @@ function fetchArticle($url)
         /** @var \Dom\Node|object{outerHTML: string} $node */
         if ($node->nodeName == "P") {
             // paragraphs and subheadings left as they are
+            logDebug("Processing paragraph for article: $url");
             $ArticleStr .= $node->outerHTML . "\n";
         } elseif ($node->nodeName == "H2") {
+            logDebug("Processing subheading for article: $url");
             $ArticleStr .= $node->outerHTML . "\n";
         } elseif ($node->nodeName == "FIGURE") {
             // imag urls are extracted and replaced with placeholders
             $imgElement = $node->getElementsByTagName("img")->item(0);
             if (!$imgElement) {
+                logDebug("Image element not found for article: $url");
                 continue; // other figures(videos etc.) are skipped
             }
             $imgurl = getLargestSrcsetFromImgElement($imgElement);
@@ -164,7 +168,7 @@ function fetchArticle($url)
             $imgList[] = $img;
             $ArticleStr .= "<figure><img src=\"image-$imageid-src\" id=\"image-$imageid\"><figcaption>$caption</figcaption></figure><br>\n";
         } elseif ($node->nodeName == "BLOCKQUOTE") {
-
+            logDebug("Processing blockquote for article: $url");
             $ArticleStr .= "<blockquote><p>" . $node->textContent . "</p></blockquote><br>\n";
         } elseif ($node->nodeName == "DIV") {
             // fetch divs mostly highlight boxes wiith a limited color set
@@ -172,6 +176,7 @@ function fetchArticle($url)
             $nodeClasses = explode(" ", $nodeClasses);
             foreach ($nodeClasses as $class) {
                 if (str_starts_with($class, "is-style-highlight-box-")) {
+                    logDebug("Processing highlight box for article: $url");
                     if (!$node->getElementsByTagName("div")->item(0)) {
                         $text = $node->innerHTML;
                     } else {
@@ -517,4 +522,12 @@ function createDB(PDO $conn)
         Date DATE,
         CONSTRAINT FOREIGN KEY (Author) REFERENCES authors(Name)
     )");
+}
+
+function logDebug($message)
+{
+    $logFile = 'debug.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $logMessage = "[$timestamp] $message\n";
+    file_put_contents($logFile, $logMessage, FILE_APPEND);
 }
