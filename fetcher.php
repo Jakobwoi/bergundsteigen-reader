@@ -1,4 +1,5 @@
 <?php
+require("config.php");
 function fetchArchive($offset = 0, $type = "artikel", $year = "", $search = "", $order = "desc")
 {
     $url = "https://www.bergundsteigen.com/wp-admin/admin-ajax.php";
@@ -142,10 +143,10 @@ function fetchArticle($url)
         if ($node->nodeName == "P") {
             // paragraphs and subheadings left as they are
             logDebug("Processing paragraph for article: $url");
-            $ArticleStr .= $node->outerHTML . "\n";
+            $ArticleStr .= $htmlDom->saveHTML($node) . "\n";
         } elseif ($node->nodeName == "H2") {
             logDebug("Processing subheading for article: $url");
-            $ArticleStr .= $node->outerHTML . "\n";
+            $ArticleStr .= $htmlDom->saveHTML($node) . "\n";
         } elseif ($node->nodeName == "FIGURE") {
             // imag urls are extracted and replaced with placeholders
             $imgElement = $node->getElementsByTagName("img")->item(0);
@@ -526,6 +527,7 @@ function createDB(PDO $conn)
 
 function logDebug($message)
 {
+    global $DEBUG_MODE;
     if (!$DEBUG_MODE) {
         return;
     }
